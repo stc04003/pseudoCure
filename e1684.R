@@ -1,8 +1,11 @@
 ## #######################################################################
 ## Load and prepare the Melanoma data 
 ## #######################################################################
-
+library(survival)
 library(microbenchmark)
+library(Rcpp)
+
+sourceCpp("RcppCodes.cpp")
 
 data(e1684, package = "smcure")
 head(e1684)
@@ -17,30 +20,40 @@ KM <- survfit(Surv(FAILTIME, FAILCENS) ~ 1, data = e1684)
 
 
 minS(e1684$FAILTIME, e1684$FAILCENS)
+minSi(e1684$FAILTIME, e1684$FAILCENS)
 
 microbenchmark(survfit(Surv(FAILTIME, FAILCENS) ~ 1, data = e1684),
                minS(e1684$FAILTIME, e1684$FAILCENS))               
-    
-library(Rcpp)
 
-sourceCpp(code = '
-#include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
-using namespace arma;
-// [[Rcpp::export]]
-double minS(arma::vec Time, arma::vec censor) {
-  arma::vec T0 = arma::sort(arma::unique(Time));
-  int n = T0.n_elem;
-  arma::vec d(n, arma::fill::zeros);
-  arma::vec r(n, arma::fill::zeros); 
-  for (int i = 0; i < n; i++) {
-    arma::uvec ind1 = find(Time == T0[i]);
-    d[i] = sum(censor.elem(ind1));
-    r.elem(regspace<uvec>(0, i)) += ind1.n_elem;
-  }
-  return(prod(1 - d / r));
-}')
 
+n <- 100
+tt <- rexp(n)
+dd <- sample(0:1, n, T)
+## dd <- rep(1, n)
+tt <- sort(tt)
+
+KM <- survfit(Surv(tt, dd) ~ 1)
+all.equal(minS(tt, dd), min(KM$surv))
+all.equal(minS(tt, dd), drop(minSi(tt, dd))[n + 1])
+all.equal(drop(minSi(tt, dd))[1:n], sapply(1:n, function(k) min(update(KM, subset = -k)$surv)))
+
+tt <- round(tt, 1)
+
+KM <- survfit(Surv(tt, dd) ~ 1)
+all.equal(minS(tt, dd), min(KM$surv))
+all.equal(minS(tt, dd), drop(minSi(tt, dd))[n + 1])
+all.equal(drop(minSi(tt, dd))[1:n], sapply(1:n, function(k) min(update(KM, subset = -k)$surv)))
+
+drop(minSi(tt, dd))[1:n]
+sapply(1:n, function(k) min(update(KM, subset = -k)$surv))
+
+cbind(tt, dd)
+
+microbenchmark(drop(minS(tt, dd)), drop(minSi(tt, dd)))
+
+microbenchmark(drop(minS(tt, dd)),
+               drop(minSi(tt, dd)),
+               sapply(1:n, function(k) min(update(KM, subset = -k)$surv)))
 
 
 ## #######################################################################
