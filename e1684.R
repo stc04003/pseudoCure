@@ -26,7 +26,7 @@ microbenchmark(survfit(Surv(FAILTIME, FAILCENS) ~ 1, data = e1684),
                minS(e1684$FAILTIME, e1684$FAILCENS))               
 
 
-n <- 100
+n <- 1000
 tt <- rexp(n)
 dd <- sample(0:1, n, T)
 ## dd <- rep(1, n)
@@ -55,6 +55,11 @@ microbenchmark(drop(minS(tt, dd)),
                drop(minSi(tt, dd)),
                sapply(1:n, function(k) min(update(KM, subset = -k)$surv)))
 
+drop(minSi(tt, dd)) 
+drop(minSi2(tt, dd))
+all.equal(drop(minSi(tt, dd)), drop(minSi2(tt, dd)))
+
+microbenchmark(drop(minSi(tt, dd)), drop(minSi2(tt, dd)))
 
 ## #######################################################################
 ## EM-based approach for mixture cure model

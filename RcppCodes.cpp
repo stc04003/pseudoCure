@@ -27,11 +27,10 @@ double minS(const arma::vec Time,
 // The last element is the min KM using all data
 // [[Rcpp::export(rng = false)]]
 arma::vec minSi(const arma::vec Time,
-		const arma::vec censor) {
+								const arma::vec censor) {
   arma::vec T0 = arma::sort(arma::unique(Time));
   int n = T0.n_elem;
   int N = Time.n_elem;
-  arma::vec out0(n, arma::fill::ones); // ordered
   arma::vec out1(n, arma::fill::ones); // ordered
   arma::vec out2(N + 1, arma::fill::ones);
   arma::vec d(n, arma::fill::zeros);
@@ -43,29 +42,26 @@ arma::vec minSi(const arma::vec Time,
     r(span(0, i)) += ind1.n_elem;
   }
   // Calculate leave-one-out KM
-  out0(span(1, n - 1)) *= 1 - d[0] / (r[0] - 1);
   out1(span(1, n - 1)) *= 1 - d[0] / (r[0] - 1);
   if (r[0] > 1) {
     out1(0) = 1 - (d[0] - 1) / (r[0] - 1);
-    out0(0) = 1 - d[0] / (r[0] - 1);    
   }    
   for (int i = 1; i < n - 1; i++) {
     out1(span(0, i - 1)) *= 1 - d[i] / r[i];
     out1(span(i + 1, n - 1)) *= 1 - d[i] / (r[i] - 1);
-    out0(span(0, i - 1)) *= 1 - d[i] / r[i];
-    out0(span(i + 1, n - 1)) *= 1 - d[i] / (r[i] - 1);
     if (r[i] > 1) {
       out1(i) *= 1 - (d[i] - 1) / (r[i] - 1);
-      out0(i) *= 1 - d[i] / (r[i] - 1);
     }
   }
   int i = n - 1;
   out1(span(0, i - 1)) *= 1 - d[i] / r[i];
-  out0(span(0, i - 1)) *= 1 - d[i] / r[i];
   if (r[i] > 1) {
     out1(i) *= 1 - (d[i] - 1) / (r[i] - 1);
-    out0(i) *= 1 - d[i] / (r[i] - 1);
   }
+	arma::vec out0 = out1;
+	for (int i = 0; i < n - 1; i++) {
+		out0(i) *= 1 - 1 / (r[i] - d[i]);
+	}
   // Reassign
   for (int i = 0; i < N; i++) {
     arma::vec tmp;
