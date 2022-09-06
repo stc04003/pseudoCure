@@ -11,56 +11,6 @@ data(e1684, package = "smcure")
 head(e1684)
 e1684 <- na.omit(e1684)
 
-
-n <- nrow(e1684)
-tmax <- max(e1684$FAILTIME[e1684$FAILCENS > 0])
-
-KM <- survfit(Surv(FAILTIME, FAILCENS) ~ 1, data = e1684)
-(cure <- min(KM$surv) )
-
-
-minS(e1684$FAILTIME, e1684$FAILCENS)
-minSi(e1684$FAILTIME, e1684$FAILCENS)
-
-microbenchmark(survfit(Surv(FAILTIME, FAILCENS) ~ 1, data = e1684),
-               minS(e1684$FAILTIME, e1684$FAILCENS))               
-
-
-n <- 1000
-tt <- rexp(n)
-dd <- sample(0:1, n, T)
-## dd <- rep(1, n)
-tt <- sort(tt)
-
-KM <- survfit(Surv(tt, dd) ~ 1)
-all.equal(minS(tt, dd), min(KM$surv))
-all.equal(minS(tt, dd), drop(minSi(tt, dd))[n + 1])
-all.equal(drop(minSi(tt, dd))[1:n], sapply(1:n, function(k) min(update(KM, subset = -k)$surv)))
-
-tt <- round(tt, 1)
-
-KM <- survfit(Surv(tt, dd) ~ 1)
-all.equal(minS(tt, dd), min(KM$surv))
-all.equal(minS(tt, dd), drop(minSi(tt, dd))[n + 1])
-all.equal(drop(minSi(tt, dd))[1:n], sapply(1:n, function(k) min(update(KM, subset = -k)$surv)))
-
-drop(minSi(tt, dd))[1:n]
-sapply(1:n, function(k) min(update(KM, subset = -k)$surv))
-
-cbind(tt, dd)
-
-microbenchmark(drop(minS(tt, dd)), drop(minSi(tt, dd)))
-
-microbenchmark(drop(minS(tt, dd)),
-               drop(minSi(tt, dd)),
-               sapply(1:n, function(k) min(update(KM, subset = -k)$surv)))
-
-drop(minSi(tt, dd)) 
-drop(minSi2(tt, dd))
-all.equal(drop(minSi(tt, dd)), drop(minSi2(tt, dd)))
-
-microbenchmark(drop(minSi(tt, dd)), drop(minSi2(tt, dd)))
-
 ## #######################################################################
 ## EM-based approach for mixture cure model
 ## #######################################################################
