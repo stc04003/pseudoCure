@@ -35,7 +35,8 @@ summary(fit.inc)
 ## Pseudo-residual
 e1684.inc$resid <- e1684.inc$curei - 
   1 / (exp(-model.matrix(~ AGE + TRT * SEX, e1684.inc) %*% fit.inc$beta) + 1)
-ggplot(e1684.inc, aes(x = interaction(TRT, SEX), y = resid, fill = interaction(TRT, SEX))) +
+ggplot(e1684.inc, aes(x = interaction(TRT, SEX), y = resid,
+                      fill = interaction(TRT, SEX))) +
   geom_boxplot() + ylab("Residual") +
   scale_fill_discrete(labels = c("Control/Male", "Control/Female", 
                                  "Treatment/Male", "Treatment/Female")) +
@@ -46,14 +47,34 @@ ggplot(e1684.inc, aes(x = interaction(TRT, SEX), y = resid, fill = interaction(T
         legend.position = "bottom")
 
 ## Cure rate
-newDat$cure.ps <- 1 - 1 / (1 + exp(-model.matrix(~ AGE + TRT * SEX, data = newDat) %*% fit.inc$b)) 
+newDat$cure.ps <-
+  1 - 1 / (1 + exp(-model.matrix(~ AGE + TRT * SEX, data = newDat) %*% fit.inc$b)) 
 newDat
 
 ## ####################################
 ## Latency component
 ## ####################################
 
+head(drop(minSi(e1684$FAILTIME, e1684$FAILCENS)))
+head(drop(minSi1(e1684$FAILTIME, e1684$FAILCENS)))
+tail(drop(minSi(e1684$FAILTIME, e1684$FAILCENS)))
+tail(drop(minSi1(e1684$FAILTIME, e1684$FAILCENS)))
+            
 t0 <- quantile(e1684$FAILTIME[e1684$FAILCENS > 0], c(1:9 / 10, .95))
+
+KM <- survfit(Surv(FAILTIME, FAILCENS) ~ 1, data = e1684)
+S <- KM$surv[findInterval(t0, KM$time)]
+
+KM$surv[findInterval(t0, KM$time)]
+
+sapply(findInterval(t0, KM$time), function(e) 
+  drop(minSi1(e1684$FAILTIME, e1684$FAILCENS, e))[n + 1])
+
+
+Si <- sapply(1:nrow(e1684), function(k) { 
+  KM.reduce <- update(KM, subset = -k)
+  findInterval(t0, KM.reduce$time)
+})
 
 e
 
@@ -95,3 +116,14 @@ drop(minSi2(tt, dd))
 all.equal(drop(minSi(tt, dd)), drop(minSi2(tt, dd)))
 
 microbenchmark(drop(minSi(tt, dd)), drop(minSi2(tt, dd)))
+
+
+sourceCpp("RcppCodes.cpp")
+
+b <- 6
+yy <- sort(rexp(b))
+## cc <- rep(1, 6)
+cc <- sample(0:1, b, T)
+
+drop(minSi(yy, cc))
+drop(minSi1(yy, cc))
