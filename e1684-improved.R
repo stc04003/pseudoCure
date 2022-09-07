@@ -1,6 +1,9 @@
-## #######################################################################
+## ###########################################################################
 ## Load and prepare the Melanoma data 
-## #######################################################################
+## If latency component is involved, call minSi4(), otherwise, call minSi()
+## If short-term component is involved, call minSi4(), otherwise, call minSi()
+## ###########################################################################
+
 library(survival)
 library(microbenchmark)
 library(Rcpp)
@@ -11,12 +14,13 @@ sourceCpp("RcppCodes.cpp")
 data(e1684, package = "smcure")
 head(e1684)
 e1684 <- na.omit(e1684)
+n <- nrow(e1684)
+tmax <- max(e1684$FAILTIME[e1684$FAILCENS > 0])
+t0 <- quantile(e1684$FAILTIME[e1684$FAILCENS > 0], c(1:9 / 10, .95))
 
 ## ####################################
 ## Incidence component
 ## ####################################
-n <- nrow(e1684)
-tmax <- max(e1684$FAILTIME[e1684$FAILCENS > 0])
 
 KMs <- minSi(e1684$FAILTIME, e1684$FAILCENS)
 cure <- KMs[length(KMs)]
@@ -24,6 +28,18 @@ cure <- KMs[length(KMs)]
 e1684.inc <- e1684
 e1684.inc$id <- 1:n
 e1684.inc$curei <- n * (1 - cure) - (n - 1) * (1 - KMs[1:n])
+head(e1684.inc)
+
+fit.inc <- geese(curei ~ AGE + TRT * SEX, data = e1684.inc,
+                jack = TRUE, scale.fix = TRUE, family = gaussian, mean.link = "logit")
+
+summary(fit.inc)
+
+## If we know we are doing latent compoent
+KMs2 <- minSi4(e1684$FAILTIME, e1684$FAILCENS, c(t0, max(e1684$FAILTIME)))
+e1684.inc <- e1684
+e1684.inc$id <- 1:n
+e1684.inc$curei <- n * (1 - cure) - (n - 1) * (1 - KMs2[length(t0) + 1, 1:n])
 head(e1684.inc)
 
 fit.inc <- geese(curei ~ AGE + TRT * SEX, data = e1684.inc,
@@ -55,75 +71,92 @@ newDat
 ## Latency component
 ## ####################################
 
-head(drop(minSi(e1684$FAILTIME, e1684$FAILCENS)))
-head(drop(minSi1(e1684$FAILTIME, e1684$FAILCENS)))
-tail(drop(minSi(e1684$FAILTIME, e1684$FAILCENS)))
-tail(drop(minSi1(e1684$FAILTIME, e1684$FAILCENS)))
-            
-t0 <- quantile(e1684$FAILTIME[e1684$FAILCENS > 0], c(1:9 / 10, .95))
+S <- KMs2[1:length(t0), n + 1]
+Si <- KMs2[1:length(t0), 1:n]
+cure <- KMs2[length(t0) + 1, n + 1]
+curei <- KMs2[length(t0) + 1, 1:n]
 
-KM <- survfit(Surv(FAILTIME, FAILCENS) ~ 1, data = e1684)
-S <- KM$surv[findInterval(t0, KM$time)]
+e1684.lat <- e1684[rep(1:n, each = length(t0)),]
+e1684.lat$id <- rep(1:n, each = length(t0))
+e1684.lat$Si <- n * (S - cure) / (1 - cure) - c((n - 1) * (Si - curei) / (1 - curei))
+e1684.lat$Fi <- 1 - e1684.lat$Si
+e1684.lat$t <- as.factor(rep(t0, n))
+rownames(e1684.lat) <- NULL
+head(e1684.lat)
 
-KM$surv[findInterval(t0, KM$time)]
+fit.lat <- geese(Fi ~ 0 + t + AGE + TRT * SEX, data = e1684.lat, id = id, 
+                jack = TRUE, scale.fix = TRUE, family = gaussian, mean.link = "cloglog")
+summary(fit.lat)
 
-sapply(findInterval(t0, KM$time), function(e) 
-  drop(minSi1(e1684$FAILTIME, e1684$FAILCENS, e))[n + 1])
+## Pseudo-residual
+e1684.lat$resid <- 
+  e1684.lat$Si - exp(-exp(model.matrix(~ 0 + t + AGE + TRT * SEX, e1684.lat) %*% fit.lat$beta))
+levels(e1684.lat$t) <- paste0("t = ", unique(e1684.lat$t))
+ggplot(subset(e1684.lat, t0 %in% t0[2:5 * 2]), 
+       aes(x = interaction(TRT, SEX), y = resid, fill = interaction(TRT, SEX))) +
+  facet_wrap(~ t) + geom_boxplot() + ylab("Residual") +
+  scale_fill_discrete(labels = c("Control/Male", "Control/Female", 
+                                 "Treatment/Male", "Treatment/Female")) +
+  theme(axis.text.x = element_blank(), 
+        axis.title.x = element_blank(), 
+        axis.ticks.x = element_blank(),
+        legend.title = element_blank(), 
+        legend.position = "bottom")
 
+## ####################################
+## Long-term effect
+## ####################################
 
-Si <- sapply(1:nrow(e1684), function(k) { 
-  KM.reduce <- update(KM, subset = -k)
-  findInterval(t0, KM.reduce$time)
-})
+e1684.long <- e1684
+e1684.long$id <- 1:n
+e1684.long$thetai <- n * (-log(cure)) - (n - 1) * (-log(curei))
+head(e1684.long)
 
-e
+fit.long <- geese(thetai ~ AGE + TRT * SEX, data = e1684.long,
+                  jack = TRUE, scale.fix = TRUE, family = gaussian, mean.link = "log")
+summary(fit.long)
 
-## #######################################################################
-## Try
-## #######################################################################
-
-n <- 1000
-tt <- rexp(n)
-dd <- sample(0:1, n, T)
-## dd <- rep(1, n)
-tt <- sort(tt)
-
-KM <- survfit(Surv(tt, dd) ~ 1)
-all.equal(minS(tt, dd), min(KM$surv))
-all.equal(minS(tt, dd), drop(minSi(tt, dd))[n + 1])
-all.equal(drop(minSi(tt, dd))[1:n], sapply(1:n, function(k) min(update(KM, subset = -k)$surv)))
-
-tt <- round(tt, 1)
-
-KM <- survfit(Surv(tt, dd) ~ 1)
-all.equal(minS(tt, dd), min(KM$surv))
-all.equal(minS(tt, dd), drop(minSi(tt, dd))[n + 1])
-all.equal(drop(minSi(tt, dd))[1:n], sapply(1:n, function(k) min(update(KM, subset = -k)$surv)))
-
-drop(minSi(tt, dd))[1:n]
-sapply(1:n, function(k) min(update(KM, subset = -k)$surv))
-
-cbind(tt, dd)
-
-microbenchmark(drop(minS(tt, dd)), drop(minSi(tt, dd)))
-
-microbenchmark(drop(minS(tt, dd)),
-               drop(minSi(tt, dd)),
-               sapply(1:n, function(k) min(update(KM, subset = -k)$surv)))
-
-drop(minSi(tt, dd)) 
-drop(minSi2(tt, dd))
-all.equal(drop(minSi(tt, dd)), drop(minSi2(tt, dd)))
-
-microbenchmark(drop(minSi(tt, dd)), drop(minSi2(tt, dd)))
+## Pseudo residual
+e1684.long$resid <- e1684.long$thetai - 
+  exp(model.matrix(~ AGE + TRT * SEX, e1684.long) %*% fit.long$beta)
+ggplot(e1684.long, aes(x = interaction(TRT, SEX), y = resid, fill = interaction(TRT, SEX))) +
+  geom_boxplot() + ylab("Residual") +
+  scale_fill_discrete(labels = c("Control/Male", "Control/Female", 
+                                 "Treatment/Male", "Treatment/Female")) +
+  theme(axis.text.x = element_blank(), 
+        axis.title.x = element_blank(), 
+        axis.ticks.x = element_blank(),
+        legend.title = element_blank(), 
+        legend.position = "bottom")
 
 
-sourceCpp("RcppCodes.cpp")
+## ####################################
+## Short-term effect
+## ####################################
 
-b <- 6
-yy <- sort(rexp(b))
-## cc <- rep(1, 6)
-cc <- sample(0:1, b, T)
+e1684.short <- e1684[rep(1:n, each = length(t0)),]
+e1684.short$id <- rep(1:n, each = length(t0))
+e1684.short$Fi <- n * (log(S) / log(cure)) - c((n - 1) * log(Si) / log(curei))
+e1684.short$t <- as.factor(rep(t0, n))
+rownames(e1684.short) <- NULL
+head(e1684.short)
 
-drop(minSi(yy, cc))
-drop(minSi1(yy, cc))
+fit.short <- geese(Fi ~ 0 + t + AGE + TRT * SEX, data = e1684.short,
+             jack = TRUE, scale.fix = TRUE, family = gaussian, mean.link = "cloglog")
+summary(fit.short)
+
+
+## Pseudo residual 
+e1684.short$resid <- 1 - e1684.short$Fi - exp(-exp(
+  model.matrix(~ 0 + t + AGE + TRT * SEX, e1684.short) %*% fit.short$beta))
+levels(e1684.short$t) <- paste0("t = ", unique(e1684.short$t))
+ggplot(subset(e1684.short, t0 %in% t0[2:5 * 2]), 
+       aes(x = interaction(TRT, SEX), y = resid, fill = interaction(TRT, SEX))) +
+  facet_wrap(~ t) + geom_boxplot() + ylab("Residual") +
+  scale_fill_discrete(labels = c("Control/Male", "Control/Female", 
+                                 "Treatment/Male", "Treatment/Female")) +
+  theme(axis.text.x = element_blank(), 
+        axis.title.x = element_blank(), 
+        axis.ticks.x = element_blank(),
+        legend.title = element_blank(), 
+        legend.position = "bottom")

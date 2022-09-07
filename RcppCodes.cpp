@@ -67,9 +67,10 @@ arma::vec minSi(const arma::vec Time,
 
 
 // Leave one out at different quantile
+// slower than minSi but more useful when calculating multiple S(t) at t0
 // [[Rcpp::export(rng = false)]]
 arma::vec minSi1(const arma::vec Time,
-		 const arma::vec censor) {
+								 const arma::vec censor) {
   arma::vec T0 = arma::sort(arma::unique(Time));
   int n = T0.n_elem;
   int N = Time.n_elem;
@@ -87,14 +88,134 @@ arma::vec minSi1(const arma::vec Time,
   arma::mat rmat = repmat(r, 1, N);
   for (int i = 0; i < N; i++) {
     arma::uvec ind = find(Time[i] == T0, 1);
-    if (censor[i] > 0) dmat[ind, i] -= 1;
-    rmat(span((int) ind(0), n - 1), i) -= 1;
-    arma::vec dr = dmat.col(i) / rmat.col(i);
-    dr.replace(arma::datum::nan, 0);
+		// std::cout << "ind: " << ind << "\n";
+		int tmp = (int) ind(0);
+		if (censor[i] > 0) dmat(tmp, i) -= 1;
+		rmat(span(0, tmp), i) -= 1; 
+		arma::vec dr = dmat.col(i) / rmat.col(i);
+		dr.replace(arma::datum::nan, 0);
     dr.replace(arma::datum::inf, 0);
-    // std::cout << dr << "\n";
     out[i] = prod(1 - dr);
   }
-  out[N] = prod(1 - d / r); 
+  out[N] = prod(1 - d / r);
+  return(out);
+}
+
+// [[Rcpp::export(rng = false)]]
+arma::vec minSi2(const arma::vec Time,
+								 const arma::vec censor) {
+  arma::vec T0 = arma::sort(arma::unique(Time));
+  int n = T0.n_elem;
+  int N = Time.n_elem;
+  arma::vec d(n, arma::fill::zeros);
+  arma::vec r(n, arma::fill::zeros); 
+  arma::vec out(N + 1, arma::fill::ones);
+  // calculate d and r for all data
+  for (int i = 0; i < n; i++) {
+    arma::uvec ind1 = find(Time == T0[i]);
+    d[i] = sum(censor.elem(ind1));
+    r(span(0, i)) += ind1.n_elem;
+  }	
+	for (int i = 0; i < N; i++) {
+		arma::vec d2 = d;
+		arma::vec r2 = r;
+    arma::uvec ind = find(Time[i] == T0, 1);
+		int tmp = (int) ind(0);
+		if (censor[i] > 0) d2(tmp) -= 1;
+		r2(span(0, tmp)) -= 1; 
+		arma::vec dr = d2 / r2;
+		dr.replace(arma::datum::nan, 0);
+    dr.replace(arma::datum::inf, 0);
+    out[i] = prod(1 - dr);
+  }
+  out[N] = prod(1 - d / r);
+  return(out);
+}
+
+
+// /////////
+
+// [[Rcpp::export(rng = false)]]
+arma::mat minSi3(const arma::vec Time,
+								 const arma::vec censor,
+								 const arma::vec Q) {
+  arma::vec T0 = arma::sort(arma::unique(Time));
+  int n = T0.n_elem;
+  int N = Time.n_elem;
+  arma::vec d(n, arma::fill::zeros);
+  arma::vec r(n, arma::fill::zeros); 
+  arma::mat out(Q.n_elem, N + 1, arma::fill::ones);
+  // calculate d and r for all data
+  for (int i = 0; i < n; i++) {
+    arma::uvec ind1 = find(Time == T0[i]);
+    d[i] = sum(censor.elem(ind1));
+    r(span(0, i)) += ind1.n_elem;
+  }
+	// Identify quantiles; like findInterval()
+	arma::uvec ind1(Q.n_elem, arma::fill::ones);;
+	for (int i = 0; i < Q.n_elem; i++) {
+		arma::uvec tmp = find(Q(i) >= T0, 1, "last");
+		ind1(i) = tmp(0);
+	}
+  // calculate d and r for each leave one out object
+  arma::mat dmat = repmat(d, 1, N);
+  arma::mat rmat = repmat(r, 1, N);
+  for (int i = 0; i < N; i++) {
+    arma::uvec ind2 = find(Time[i] == T0, 1);
+		int tmp = (int) ind2(0);
+		if (censor[i] > 0) dmat(tmp, i) -= 1;
+		rmat(span(0, tmp), i) -= 1; 
+		arma::vec dr = dmat.col(i) / rmat.col(i);
+		dr.replace(arma::datum::nan, 0);
+    dr.replace(arma::datum::inf, 0);
+		arma::vec S = cumprod(1 - dr);
+		for (int j = 0; j < Q.n_elem; j++) {
+			out(j, i) = S(ind1(j));
+		}
+  }
+	arma::vec S = cumprod(1 - d / r); 
+  out.col(N) = S(ind1);
+  return(out);
+}
+
+// [[Rcpp::export(rng = false)]]
+arma::mat minSi4(const arma::vec Time,
+								 const arma::vec censor,
+								 const arma::vec Q) {
+  arma::vec T0 = arma::sort(arma::unique(Time));
+  int n = T0.n_elem;
+  int N = Time.n_elem;
+  arma::vec d(n, arma::fill::zeros);
+  arma::vec r(n, arma::fill::zeros);
+	arma::mat out(Q.n_elem, N + 1, arma::fill::ones);
+  // calculate d and r for all data
+  for (int i = 0; i < n; i++) {
+    arma::uvec ind1 = find(Time == T0[i]);
+    d[i] = sum(censor.elem(ind1));
+    r(span(0, i)) += ind1.n_elem;
+  }
+	// Identify quantiles; like findInterval()
+	arma::uvec ind1(Q.n_elem, arma::fill::ones);;
+	for (int i = 0; i < Q.n_elem; i++) {
+		arma::uvec tmp = find(Q(i) >= T0, 1, "last");
+		ind1(i) = tmp(0);
+	}
+	for (int i = 0; i < N; i++) {
+		arma::vec d2 = d;
+		arma::vec r2 = r;
+    arma::uvec ind = find(Time[i] == T0, 1);
+		int tmp = (int) ind(0);
+		if (censor[i] > 0) d2(tmp) -= 1;
+		r2(span(0, tmp)) -= 1; 
+		arma::vec dr = d2 / r2;
+		dr.replace(arma::datum::nan, 0);
+    dr.replace(arma::datum::inf, 0);
+		arma::vec S = cumprod(1 - dr);
+		for (int j = 0; j < Q.n_elem; j++) {
+			out(j, i) = S(ind1(j));
+		}
+  }
+	arma::vec S = cumprod(1 - d / r); 
+  out.col(N) = S(ind1);
   return(out);
 }
