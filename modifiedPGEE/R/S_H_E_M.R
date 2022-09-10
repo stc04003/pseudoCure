@@ -33,3 +33,5 @@ S_H_E_M <- function(N,nt,y,X,nx,family,beta_new,Rhat,fihat,lambda,pindex,eps=10^
 }
 
 
+## gaussian(link = "cloglog")$linkinv
+## gaussian(link = "logit")$mu.eta

@@ -1,8 +1,12 @@
 library(Rcpp)
 library(microbenchmark)
 
-## Assume family = gaussian for our cure models
+## incidence: gaussian(link = "logit")
+## latency: gaussian(link = "cloglog")
+## long-term: gaussian(link = "log")
+## short-term: gaussian(link = "cloglog")
 ## Assume fi = 1 because of the gaussian assumption
+## Assume equal cluster size
 sourceCpp(file = "PGEE.cpp")
 
 ## ##################################################
@@ -58,9 +62,14 @@ out2 <- SHEM(y, X, beta_new, Rhat, nt, pindex, lambda, eps)
 str(out2)
 
 sourceCpp(file = "PGEE.cpp")
-out <- gee(y, X, beta_new, Rhat, nt, pindex, lambda, eps, 1e-7, 100)
+pindex <- rep(0, ncol(X))
+
+out <- gee(y, X, beta_new, Rhat, nt, pindex, "log", lambda, 1e-6, 1e-7, 100)
+out <- gee(y, X, beta_new, Rhat, nt, pindex, 1, lambda, 1e-6, 1e-7, 100)
 str(out)
 
+SHEM(y, X, beta_new, Rhat, nt, pindex, lambda, 1e-6)
+SHEM(y, X, beta_new, Rhat, nt, pindex, 1, lambda, 1e-6)
 e
 
 
@@ -147,7 +156,7 @@ arma::vec r3(double a) {
   arma::vec out(10);
   out.fill(a);
   Rcpp::List tmp = r2(a);
-  arma::mat m = tmp(1);
+  arma::mat m = tmp(0);
   std::cout << m;
   return(out);
 }')
@@ -156,3 +165,117 @@ r3(3)
 
 
 q_scad(abs(c(beta_new)), lambda) / (abs(as.vector(beta_new)) + eps)
+
+
+
+sourceCpp(code = '
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+using namespace arma;
+// [[Rcpp::export]]
+double a1(arma::vec a) {
+  arma::mat tmp = a * a.t(); 
+  tmp.diag().zeros();
+  return(sum(sum(tmp)));
+}
+// [[Rcpp::export]]
+double a2(arma::vec a) {
+  double out = 0; 
+  int n = a.n_elem;
+  for (int i = 0; i < n - 1; i++) {
+    for (int j = i + 1; j < n; j++) {
+       out += a[i] * a[j];
+  }}
+  return(2 * out);
+}
+// [[Rcpp::export]]
+double a22(arma::vec a) {
+  double out = 0; 
+  int n = a.n_elem;
+  double a2 = sum(a) * sum(a);
+  return(a2 - sum(a % a));
+}')
+
+a1(1:50)
+a2(1:50)
+a22(1:50)
+
+a <- 1:5
+microbenchmark(tcrossprod(a), a1(a), a2(a))
+
+
+res <- drop(y - X %*% beta_new)
+res[1:4]
+res[5:8]
+
+sum(tcrossprod(res[1:4]))
+
+Rhat[,,1]
+
+sum(sapply(1:N, function(i) {
+    tmp <- tcrossprod(res[1:4 + 4 * i - 4])
+    diag(tmp) <- 0
+    sum(tmp)})) / 12 / N
+sum(sapply(1:N, function(i) a1(res[1:4 + 4 * i - 4]))) / 12 / N
+sum(sapply(1:N, function(i) a2(res[1:4 + 4 * i - 4]))) / 12 / N
+
+microbenchmark(sum(sapply(1:N, function(i) {
+    tmp <- tcrossprod(res[1:4 + 4 * i - 4])
+    diag(tmp) <- 0
+    sum(tmp)})) / 12 / N,
+    sum(apply(matrix(res, 4), 2, a2)) / 12 / N,
+    sum(sapply(1:N, function(i) a1(res[1:4 + 4 * i - 4]))) / 12 / N,
+    sum(sapply(1:N, function(i) a2(res[1:4 + 4 * i - 4]))) / 12 / N)
+
+
+sourceCpp(code = '
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+using namespace arma;
+// [[Rcpp::export]]
+double a3(arma::vec a) {
+  double out = 0; 
+  int n = a.n_elem;
+  for (int i = 0; i < n - 1; i++) {
+    out += a[i] * a[i + 1];
+  }
+  return(out);
+}
+// [[Rcpp::export]]
+double a32(arma::vec a) {
+  int n = a.n_elem;
+  double out = sum(a(span(0, n - 2)) % a(span(1, n - 1)));
+  return(out);
+}')
+
+a3(1:50)
+a32(1:50)
+
+sum(sapply(1:N, function(i) a3(res[1:4 + 4 * i - 4]))) / 3 / N
+
+tmp <- PGEE::mycor_gee2(N, nt, y, X, gaussian(), beta_new, "AR-1", 1, 4, 1, 1, 1)
+tmp <- PGEE::mycor_gee2(N, nt, y, X, gaussian(), beta_new, "exchangeable", 1, 4, 1, 1, 1)
+tmp$Ehat[,,1]
+
+identical(tmp$Ehat[,,1], tmp$Ehat[,,12])
+
+
+
+sourceCpp(code = '
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+using namespace arma;
+// [[Rcpp::export]]
+arma::mat a4(double a, int k) {
+  arma::mat out(k, k, fill::zeros);
+  arma::vec tmp(k, arma::fill::value(a));
+  tmp = cumprod(tmp) / a;
+  for (int i = 0; i < k; i++) {
+    out.submat(i, i, k - 1, i) = tmp(span(i, k - 1));
+  }
+  return(out);
+}')
+
+a4(.5, 5)
+
+0:4 - 4

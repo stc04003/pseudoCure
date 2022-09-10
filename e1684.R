@@ -50,7 +50,8 @@ head(e1684.inc)
 
 library(geepack)
 fit.inc <- geese(curei ~ AGE + TRT * SEX, data = e1684.inc,
-                jack = TRUE, scale.fix = TRUE, family = gaussian, mean.link = "logit")
+                 jack = TRUE, scale.fix = TRUE, family = gaussian,
+                 mean.link = "logit")
 
 summary(fit.inc)
 

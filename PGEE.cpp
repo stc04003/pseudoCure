@@ -30,7 +30,7 @@ Rcpp::List SHM(arma::vec y,
   arma::mat sumS(nx, 1, arma::fill::zeros);
   arma::mat sumH(nx, nx, arma::fill::zeros);
   arma::mat sumM(nx, nx, arma::fill::zeros);
-  arma::vec ym = y - mu;
+  arma::vec ym = y - mu; // gaussian()$linkinv
   // arma::mat bigD = matvec(X, muEta);
   for (int i = 0; i < N; i++) {
     arma::vec ym2 = ym(span(index(i), index(i) + nt(i) - 1));
@@ -62,15 +62,48 @@ arma::vec qscad(arma::vec b, double lambda) {
   return(out);
 }
 
+Rcpp::List logLink (arma::vec eta) {
+	Rcpp::List out(2);
+	arma::vec eeta = exp(eta);
+	eeta.replace(arma::datum::inf, pow(2, 1023));
+	out(0) = eeta;
+	out(1) = eeta;
+	return out;
+}
+
+Rcpp::List cloglogLink (arma::vec eta) {
+	Rcpp::List out(2);
+	arma::vec tmp = eta;	
+	tmp.elem(find(tmp > 700)).fill(700);
+	tmp = exp(tmp) * exp(-exp(tmp));
+	tmp.replace(arma::datum::inf, pow(2, 1023));
+	out(0) = 1 - exp(-exp(eta));
+	out(1) = tmp;
+	return out;
+}
+
+
+Rcpp::List logitLink (arma::vec eta) {
+	Rcpp::List out(2);
+	arma::vec eeta = exp(eta);
+	eeta.replace(arma::datum::inf, pow(2, 1023));
+	out(0) = eeta / (eeta + 1);
+	out(1) = eeta / (eeta + 1) / (eeta + 1);
+	return out;
+}
+
+
+// link: 1 = log; 2 = cloglog; 3 = logit
 // [[Rcpp::export(rng = false)]]
 Rcpp::List SHEM(arma::vec y,
-		arma::mat X,
-		arma::vec b0,
-		arma::cube Rhat,
-		arma::vec nt,
-		arma::vec pindex, // 0 means to penalize
-		double lambda,
-		double eps){
+								arma::mat X,
+								arma::vec b0,
+								arma::cube Rhat,
+								arma::vec nt,
+								arma::vec pindex, // 0 means to penalize
+								std::string glmlink,
+								double lambda,
+								double eps){
   Rcpp::List out(4);
   int N = nt.n_elem;
   int nx = X.n_cols;
@@ -83,15 +116,22 @@ Rcpp::List SHEM(arma::vec y,
   arma::mat S(nx, 1, arma::fill::zeros);
   arma::mat H(nx, nx, arma::fill::zeros);
   arma::mat M(nx, nx, arma::fill::zeros);
-  arma::vec ym = y - eta;  
-  for (int i = 0; i < N; i++) {
+	Rcpp::List links;
+	if (glmlink == "log") links = logLink(eta);
+	if (glmlink == "cloglog") links = cloglogLink(eta);
+	if (glmlink == "logit") links = logitLink(eta);
+	arma::vec mu = links(0);
+	arma::vec etamu = links(1);
+	arma::vec ym = y - mu;
+	arma::mat bigD = matvec(X, etamu);
+	for (int i = 0; i < N; i++) {
     arma::vec ym2 = ym(span(index(i), index(i) + nt(i) - 1));
-    arma::mat bigD = X.rows(span(index(i), index(i) + nt(i) - 1));
+    arma::mat bigD2 = bigD.rows(span(index(i), index(i) + nt(i) - 1));
     arma::mat RhatSlice = Rhat.slice(i);
     arma::mat bigV = RhatSlice(span(0, nt(i) - 1), span(0, nt(i) - 1));
-    arma::mat tmp = bigD.t() * pinv(bigV);
+    arma::mat tmp = bigD2.t() * pinv(bigV);
     S += tmp * ym2;
-    H += tmp * bigD;
+    H += tmp * bigD2;
     tmp *= ym2;
     M += tmp * tmp.t();
   } 
@@ -105,13 +145,14 @@ Rcpp::List SHEM(arma::vec y,
 
 // [[Rcpp::export(rng = false)]]
 Rcpp::List gee(arma::vec y,
-	       arma::mat X,
-	       arma::vec b0,
-	       arma::cube Rhat,
-	       arma::vec nt,
-	       arma::vec pindex, // 0 means to penalize
-	       double lambda, double eps,
-	       double tol, int maxit){
+							 arma::mat X,
+							 arma::vec b0,
+							 arma::vec nt,
+							 arma::vec pindex, // 0 means to penalize
+							 std::string glmlink,
+							 std::string corstr,
+							 double lambda, double eps,
+							 double tol, int maxit){
   Rcpp::List out(6);
   int N = nt.n_elem;
   int nx = X.n_cols;
@@ -126,13 +167,30 @@ Rcpp::List gee(arma::vec y,
     arma::mat S(nx, 1, arma::fill::zeros);
     arma::mat H(nx, nx, arma::fill::zeros);
     arma::mat M(nx, nx, arma::fill::zeros);
-    arma::vec ym = y - eta;  
+		Rcpp::List links;
+		if (glmlink == "log") links = logLink(eta);
+		if (glmlink == "cloglog") links = cloglogLink(eta);
+		if (glmlink == "logit") links = logitLink(eta);
+		arma::vec mu = links(0);
+		arma::vec etamu = links(1);
+		arma::vec ym = y - mu;
+		arma::mat bigD = matvec(X, etamu);
+		arma::mat Rhat(nt(0), nt(0), fill::eye);
+		double ahat = 0;
+		if (corstr = "ex" & nt(0) > 1) {
+			ahat = ahatEx(mu, nt, index);
+			Rhat = Rhat * (1 - ahat) + ahat;
+		}
+		if (corstr = "ar1" & nt(0) > 1) {
+			ahat = ahatAR1(mu, nt, index);
+			
+		}
     for (int i = 0; i < N; i++) {
       arma::vec ym2 = ym(span(index(i), index(i) + nt(i) - 1));
       arma::mat bigD = X.rows(span(index(i), index(i) + nt(i) - 1));
-      arma::mat RhatSlice = Rhat.slice(i);
-      arma::mat bigV = RhatSlice(span(0, nt(i) - 1), span(0, nt(i) - 1));
-      arma::mat tmp = bigD.t() * pinv(bigV);
+      // arma::mat RhatSlice = Rhat.slice(i);
+      // arma::mat bigV = RhatSlice(span(0, nt(i) - 1), span(0, nt(i) - 1));
+      arma::mat tmp = bigD.t() * pinv(Rhat);
       S += tmp * ym2;
       H += tmp * bigD;
       tmp *= ym2;
@@ -152,4 +210,27 @@ Rcpp::List gee(arma::vec y,
   return out;
 }
 
-//  
+// assumes equal cluster size
+double ahatEx(arma::vec a,
+							arma::vec nt,
+							arma::vec index) {
+	int n = nt.n_elem;
+	double out = 0;
+	for (int i = 0; i < n; i++) {
+		arma::vec a2 = a(span(index(i), index(i) + nt(i) - 1));
+		out += sum(a2) * sum(a2) - sum(a2 % a2);
+	}
+	return(out / nt(0) / (nt(0) - 1) / n);
+}
+
+double ahatAR1(arma::vec a,
+							 arma::vec nt,
+							 arma:;vec index) {
+	int n = nt.n_elem;
+	double out = 0;
+	for (int i = 0; i < n; i++) {
+		arma::vec a2 = a(span(index(i), index(i) + nt(i) - 1));
+		out += sum(a(span(0, nt(0) - 2)) % a(span(1, nt(0) - 1)))
+			}
+	return(out / (nt(0) - 1) / n);
+}
