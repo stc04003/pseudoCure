@@ -219,12 +219,12 @@ Rcpp::List gee(arma::vec y,
 		}
     for (int i = 0; i < N; i++) {
       arma::vec ym2 = ym(span(index(i), index(i) + nt(i) - 1));
-      arma::mat bigD = X.rows(span(index(i), index(i) + nt(i) - 1));
+      arma::mat bigD2 = bigD.rows(span(index(i), index(i) + nt(i) - 1));
       // arma::mat RhatSlice = Rhat.slice(i);
       // arma::mat bigV = RhatSlice(span(0, nt(i) - 1), span(0, nt(i) - 1));
-      arma::mat tmp = bigD.t() * pinv(Rhat);
+      arma::mat tmp = bigD2.t() * pinv(Rhat);
       S += tmp * ym2;
-      H += tmp * bigD;
+      H += tmp * bigD2;
       tmp *= ym2;
       M += tmp * tmp.t();
     }
@@ -234,9 +234,9 @@ Rcpp::List gee(arma::vec y,
     out(2) = H;
     out(3) = E;
     out(4) = M;
-    out(5) = k;
+    out(5) = j;
     if(min(abs(b1 - b0)) < tol) break;
-    b0 = b0;
+    b0 = b1;
   }
   out.names() = Rcpp::CharacterVector::create("b", "S", "H", "E", "M", "iter");
   return out;

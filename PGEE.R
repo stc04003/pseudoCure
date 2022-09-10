@@ -42,16 +42,35 @@ lambda <- 0
 
 ## ##################################################
 library(modifiedPGEE)
-f1 <- PGEE(formula = formula, id = id, data = data, na.action = NULL, 
-           family = family, corstr = "exchangeable", Mv = NULL, 
-           beta_int = c(rep(0,length(beta.true))), R = NULL, scale.fix = TRUE, 
-           scale.value = 1, lambda = lambda, pindex = NULL, eps = 1e-6, maxiter = 30, 
-           tol = 1e-7, silent = TRUE)
-
 library(geepack)
-f2 <- geese(formula, id = id, data = data, corstr = "ex", family = family, scale.fix = T)
+sourceCpp(file = "PGEE.cpp")
 
-, scale.fix = TRUE, b = c(beta_new))$b
+lambda <- 0
+
+system.time(f1 <- PGEE(y ~ . -id - 1, id = id, data = data, na.action = NULL, 
+                       family = gaussian(link = 'log'),
+                       corstr = "independence", Mv = NULL, 
+                       beta_int = c(rep(0,length(beta.true))), R = NULL, scale.fix = TRUE, 
+                       scale.value = 1, lambda = 0, pindex = 1:10,
+                       eps = 1e-6, maxiter = 30, 
+                       tol = 1e-7, silent = TRUE))
+
+system.time(f2 <- geese(y ~ . -id - 1, id = id, data = data, corstr = "ind",
+                        family = gaussian(link = 'log'), scale.fix = T, b = rep(0, 10)))
+
+
+y <- data$y
+X <- as.matrix(data[,3:12])
+
+system.time(out <- gee(y, X, rep(0, 10), tabulate(data$id), rep(1, 10),
+                       "log", "ind", lambda, 1e-6, 1e-7, 30))
+
+f1$coefficients
+f2$b
+drop(out$b)
+str(out)
+
+e
 
 ## ##################################################
 ## Test
