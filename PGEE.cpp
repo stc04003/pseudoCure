@@ -22,6 +22,7 @@ double ahatEx(arma::vec a,
 							arma::vec index) {
 	int n = nt.n_elem;
 	double out = 0;
+	a = a / stddev(a);
 	for (int i = 0; i < n; i++) {
 		arma::vec a2 = a(span(index(i), index(i) + nt(i) - 1));
 		out += sum(a2) * sum(a2) - sum(a2 % a2);
@@ -34,6 +35,7 @@ double ahatAR1(arma::vec a,
 							 arma::vec index) {
 	int n = nt.n_elem;
 	double out = 0;
+	a = a / stddev(a);
 	for (int i = 0; i < n; i++) {
 		arma::vec a2 = a(span(index(i), index(i) + nt(i) - 1));
 		out += sum(a(span(0, nt(0) - 2)) % a(span(1, nt(0) - 1)));
@@ -100,7 +102,7 @@ Rcpp::List cloglogLink (arma::vec eta) {
 	Rcpp::List out(2);
 	arma::vec tmp = eta;	
 	tmp.elem(find(tmp > 700)).fill(700);
-	tmp = exp(tmp) * exp(-exp(tmp));
+	tmp = exp(tmp) % exp(-exp(tmp));
 	tmp.replace(arma::datum::inf, pow(2, 1023));
 	out(0) = 1 - exp(-exp(eta));
 	out(1) = tmp;
@@ -185,7 +187,7 @@ Rcpp::List gee(arma::vec y,
   arma::vec index(N, arma::fill::zeros);
   index(span(1, N - 1)) = cumsum(nt(span(0, N - 2)));
   arma::vec b1 = b0;
-  for (int j = 0; j < maxit; j++) {
+  for (int j = 0; j <= maxit; j++) {
     arma::vec eta = X * b0;
     arma::vec E1 = qscad(abs(b0), lambda) / (abs(b0) + eps);
     E1.elem(find(pindex > 0)).zeros();
@@ -204,19 +206,20 @@ Rcpp::List gee(arma::vec y,
 		arma::mat Rhat(k, k, arma::fill::eye);
 		double ahat = 0;
 		if (corstr == "ex" & k > 1) {
-			ahat = ahatEx(mu, nt, index);
+			ahat = ahatEx(ym, nt, index);
 			Rhat = Rhat * (1 - ahat) + ahat;
 		}
 		if (corstr == "ar1" & k > 1) {
-			ahat = ahatAR1(mu, nt, index);
+			ahat = ahatAR1(ym, nt, index);
 			arma::vec tmp(k - 1, arma::fill::value(ahat));
 			arma::mat Rhat2(k, k, arma::fill::zeros);
 			tmp = cumprod(tmp);
-			for (int i = 0; i < k; i++) {
+			for (int i = 0; i < k - 1; i++) {
 				Rhat2.submat(i + 1, i, k - 1, i) = tmp(span(0, k - i - 2));
 			}
 			Rhat = Rhat + Rhat2 + Rhat2.t();
 		}
+		// std::cout << "ahat: " << ahat << "\n";
     for (int i = 0; i < N; i++) {
       arma::vec ym2 = ym(span(index(i), index(i) + nt(i) - 1));
       arma::mat bigD2 = bigD.rows(span(index(i), index(i) + nt(i) - 1));

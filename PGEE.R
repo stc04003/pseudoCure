@@ -13,6 +13,8 @@ sourceCpp(file = "PGEE.cpp")
 ## Generate example data
 ## ##################################################
 
+set.seed(1)
+
 library(mvtnorm)
 n <- 2000; pn <- 10; m <- 4
 id.vect <- rep(1:n, each = m) 
@@ -45,30 +47,68 @@ library(modifiedPGEE)
 library(geepack)
 sourceCpp(file = "PGEE.cpp")
 
+y <- data$y
+X <- as.matrix(data[,3:12])
+
 lambda <- 0
 
-system.time(f1 <- PGEE(y ~ . -id - 1, id = id, data = data, na.action = NULL, 
+system.time(e1 <- PGEE(y ~ . -id - 1, id = id, data = data, na.action = NULL, 
                        family = gaussian(link = 'log'),
-                       corstr = "independence", Mv = NULL, 
+                       corstr = "independence", Mv = NULL,
+                       ## corstr = "independence", Mv = NULL, 
+                       beta_int = c(rep(0,length(beta.true))), R = NULL, scale.fix = TRUE, 
+                       scale.value = 1, lambda = 0, pindex = 1:10,
+                       eps = 1e-6, maxiter = 30, 
+                       tol = 1e-7, silent = TRUE))
+system.time(e2 <- PGEE(y ~ . -id - 1, id = id, data = data, na.action = NULL, 
+                       family = gaussian(link = 'log'),
+                       corstr = "exchangeable", Mv = NULL,
+                       ## corstr = "independence", Mv = NULL, 
+                       beta_int = c(rep(0,length(beta.true))), R = NULL, scale.fix = TRUE, 
+                       scale.value = 1, lambda = 0, pindex = 1:10,
+                       eps = 1e-6, maxiter = 30, 
+                       tol = 1e-7, silent = TRUE))
+system.time(e3 <- PGEE(y ~ . -id - 1, id = id, data = data, na.action = NULL, 
+                       family = gaussian(link = 'log'),
+                       corstr = "AR-1", Mv = NULL,
+                       ## corstr = "independence", Mv = NULL, 
                        beta_int = c(rep(0,length(beta.true))), R = NULL, scale.fix = TRUE, 
                        scale.value = 1, lambda = 0, pindex = 1:10,
                        eps = 1e-6, maxiter = 30, 
                        tol = 1e-7, silent = TRUE))
 
-system.time(f2 <- geese(y ~ . -id - 1, id = id, data = data, corstr = "ind",
-                        family = gaussian(link = 'log'), scale.fix = T, b = rep(0, 10)))
+system.time(f1 <- geese(y ~ . -id - 1, id = id, data = data, corstr = "ind",
+                        family = gaussian(link = 'log'), scale.fix = T, 
+                        b = rep(0, 10)))
+system.time(f2 <- geese(y ~ . -id - 1, id = id, data = data, corstr = "ex",
+                        family = gaussian(link = 'log'), scale.fix = T, 
+                        b = rep(0, 10)))
+system.time(f3 <- geese(y ~ . -id - 1, id = id, data = data, corstr = "ar1",
+                        family = gaussian(link = 'log'), scale.fix = T, 
+                        b = rep(0, 10)))
 
+system.time(g1 <- gee(y, X, rep(0, 10), tabulate(data$id), rep(1, 10),
+                      "log", "ind", lambda, 1e-6, 1e-7, 30))
+system.time(g2 <- gee(y, X, rep(0, 10), tabulate(data$id), rep(1, 10),
+                      "log", "ex", lambda, 1e-6, 1e-7, 30))
+system.time(g3 <- gee(y, X, rep(0, 10), tabulate(data$id), rep(1, 10),
+                      "log", "ar1", lambda, 1e-6, 1e-7, 30))
 
-y <- data$y
-X <- as.matrix(data[,3:12])
+e1$iter
+e2$iter
+e3$iter
+g1$iter
+g2$iter
+g3$iter
 
-system.time(out <- gee(y, X, rep(0, 10), tabulate(data$id), rep(1, 10),
-                       "log", "ind", lambda, 1e-6, 1e-7, 30))
+cbind(drop(e1$coefficients), drop(e2$coefficients), drop(e3$coefficients))
+cbind(drop(f1$b), drop(f2$b), drop(f3$b))
+cbind(drop(g1$b), drop(g2$b), drop(g3$b))
 
-f1$coefficients
-f2$b
-drop(out$b)
-str(out)
+gaussian()$variance
+gaussian('logit')$variance
+gaussian('log')$variance
+gaussian('cloglog')$variance
 
 e
 
@@ -184,29 +224,19 @@ sourceCpp(code = '
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace arma;
-Rcpp::List r2(double a) {
-  Rcpp::List out(4);
-  arma::mat M1(1, 3, arma::fill::zeros);
-  arma::mat M2(2, 3, arma::fill::zeros);
-  arma::mat M3(3, 3, arma::fill::zeros);
-  arma::mat M4(4, 3, arma::fill::zeros);
-  out(0) = M1;
-  out(1) = M2;
-  out(2) = M3;
-  out(3) = M4;
-  return(out);
-}
 // [[Rcpp::export]]
-arma::vec r3(double a) {
-  arma::vec out(10);
-  out.fill(a);
-  Rcpp::List tmp = r2(a);
-  arma::mat m = tmp(0);
-  std::cout << m;
-  return(out);
+Rcpp::List r3(arma::vec eta) {
+	Rcpp::List out(2);
+	arma::vec tmp = eta;	
+	tmp.elem(find(tmp > 700)).fill(700);
+  tmp = exp(tmp) % exp(-exp(tmp));
+	tmp.replace(arma::datum::inf, pow(2, 1023));
+	out(0) = 1 - exp(-exp(eta));
+	out(1) = tmp;
+	return out;
 }')
 
-r3(3)
+r3(1:3)
 
 
 q_scad(abs(c(beta_new)), lambda) / (abs(as.vector(beta_new)) + eps)
