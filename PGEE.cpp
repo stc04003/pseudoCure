@@ -16,6 +16,31 @@ arma::mat matvec(arma::mat x, arma::vec y) {
   return out;
 }
 
+// assumes equal cluster size
+double ahatEx(arma::vec a,
+							arma::vec nt,
+							arma::vec index) {
+	int n = nt.n_elem;
+	double out = 0;
+	for (int i = 0; i < n; i++) {
+		arma::vec a2 = a(span(index(i), index(i) + nt(i) - 1));
+		out += sum(a2) * sum(a2) - sum(a2 % a2);
+	}
+	return(out / nt(0) / (nt(0) - 1) / n);
+}
+
+double ahatAR1(arma::vec a,
+							 arma::vec nt,
+							 arma::vec index) {
+	int n = nt.n_elem;
+	double out = 0;
+	for (int i = 0; i < n; i++) {
+		arma::vec a2 = a(span(index(i), index(i) + nt(i) - 1));
+		out += sum(a(span(0, nt(0) - 2)) % a(span(1, nt(0) - 1)));
+	}
+	return(out / (nt(0) - 1) / n);
+}
+
 //' @noRd
 // [[Rcpp::export(rng = false)]]
 Rcpp::List SHM(arma::vec y,
@@ -156,10 +181,11 @@ Rcpp::List gee(arma::vec y,
   Rcpp::List out(6);
   int N = nt.n_elem;
   int nx = X.n_cols;
+	int k = nt(0);
   arma::vec index(N, arma::fill::zeros);
   index(span(1, N - 1)) = cumsum(nt(span(0, N - 2)));
   arma::vec b1 = b0;
-  for (int k = 0; k < maxit; k++) {
+  for (int j = 0; j < maxit; j++) {
     arma::vec eta = X * b0;
     arma::vec E1 = qscad(abs(b0), lambda) / (abs(b0) + eps);
     E1.elem(find(pindex > 0)).zeros();
@@ -175,15 +201,21 @@ Rcpp::List gee(arma::vec y,
 		arma::vec etamu = links(1);
 		arma::vec ym = y - mu;
 		arma::mat bigD = matvec(X, etamu);
-		arma::mat Rhat(nt(0), nt(0), fill::eye);
+		arma::mat Rhat(k, k, arma::fill::eye);
 		double ahat = 0;
-		if (corstr = "ex" & nt(0) > 1) {
+		if (corstr == "ex" & k > 1) {
 			ahat = ahatEx(mu, nt, index);
 			Rhat = Rhat * (1 - ahat) + ahat;
 		}
-		if (corstr = "ar1" & nt(0) > 1) {
+		if (corstr == "ar1" & k > 1) {
 			ahat = ahatAR1(mu, nt, index);
-			
+			arma::vec tmp(k - 1, arma::fill::value(ahat));
+			arma::mat Rhat2(k, k, arma::fill::zeros);
+			tmp = cumprod(tmp);
+			for (int i = 0; i < k; i++) {
+				Rhat2.submat(i + 1, i, k - 1, i) = tmp(span(0, k - i - 2));
+			}
+			Rhat = Rhat + Rhat2 + Rhat2.t();
 		}
     for (int i = 0; i < N; i++) {
       arma::vec ym2 = ym(span(index(i), index(i) + nt(i) - 1));
@@ -208,29 +240,4 @@ Rcpp::List gee(arma::vec y,
   }
   out.names() = Rcpp::CharacterVector::create("b", "S", "H", "E", "M", "iter");
   return out;
-}
-
-// assumes equal cluster size
-double ahatEx(arma::vec a,
-							arma::vec nt,
-							arma::vec index) {
-	int n = nt.n_elem;
-	double out = 0;
-	for (int i = 0; i < n; i++) {
-		arma::vec a2 = a(span(index(i), index(i) + nt(i) - 1));
-		out += sum(a2) * sum(a2) - sum(a2 % a2);
-	}
-	return(out / nt(0) / (nt(0) - 1) / n);
-}
-
-double ahatAR1(arma::vec a,
-							 arma::vec nt,
-							 arma:;vec index) {
-	int n = nt.n_elem;
-	double out = 0;
-	for (int i = 0; i < n; i++) {
-		arma::vec a2 = a(span(index(i), index(i) + nt(i) - 1));
-		out += sum(a(span(0, nt(0) - 2)) % a(span(1, nt(0) - 1)))
-			}
-	return(out / (nt(0) - 1) / n);
 }

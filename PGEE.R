@@ -34,15 +34,24 @@ colnames(mydata) <- c("id","y",paste("x",1:length(beta.true),sep = ""))
 
 formula <- "y ~.-id-1"
 data <- mydata
-family <- gaussian(link = "identity")
+family <- gaussian(link = "log")
 lambda.vec <- seq(0.1,1,0.1)
-lambda <- 0.1    
+lambda <- 0.1
+lambda <- 0
 
-myfit1 <- PGEE(formula = formula, id = id, data = data, na.action = NULL, 
-               family = family, corstr = "exchangeable", Mv = NULL, 
-               beta_int = c(rep(0,length(beta.true))), R = NULL, scale.fix = TRUE, 
-               scale.value = 1, lambda = lambda, pindex = NULL, eps = 10^-6, maxiter = 30, 
-               tol = 10^-3, silent = TRUE)
+
+## ##################################################
+library(modifiedPGEE)
+f1 <- PGEE(formula = formula, id = id, data = data, na.action = NULL, 
+           family = family, corstr = "exchangeable", Mv = NULL, 
+           beta_int = c(rep(0,length(beta.true))), R = NULL, scale.fix = TRUE, 
+           scale.value = 1, lambda = lambda, pindex = NULL, eps = 1e-6, maxiter = 30, 
+           tol = 1e-7, silent = TRUE)
+
+library(geepack)
+f2 <- geese(formula, id = id, data = data, corstr = "ex", family = family, scale.fix = T)
+
+, scale.fix = TRUE, b = c(beta_new))$b
 
 ## ##################################################
 ## Test
@@ -63,13 +72,30 @@ str(out2)
 
 sourceCpp(file = "PGEE.cpp")
 pindex <- rep(0, ncol(X))
-
-out <- gee(y, X, beta_new, Rhat, nt, pindex, "log", lambda, 1e-6, 1e-7, 100)
-out <- gee(y, X, beta_new, Rhat, nt, pindex, 1, lambda, 1e-6, 1e-7, 100)
+out <- gee(y, X, beta_new, nt, pindex, "log", "ex", lambda, 1e-6, 1e-7, 100)
 str(out)
 
-SHEM(y, X, beta_new, Rhat, nt, pindex, lambda, 1e-6)
-SHEM(y, X, beta_new, Rhat, nt, pindex, 1, lambda, 1e-6)
+system.time(gee(y, X, beta_new, nt, pindex, "log", "ind", lambda, 1e-6, 1e-7, 100))
+system.time(gee(y, X, beta_new, nt, pindex, "log", "ex", lambda, 1e-6, 1e-7, 100))
+
+str(gee(y, X, beta_new, nt, pindex, "log", "ind", lambda, 1e-6, 1e-7, 100))
+str(gee(y, X, beta_new, nt, pindex, "log", "ex", lambda, 1e-6, 1e-7, 100))
+
+
+system.time(gee(y, X, beta_new, nt, rep(1, 10), "log", "ex", lambda, 1e-6, 1e-7, 100))
+
+str(gee(y, X, beta_new, nt, rep(1, 10), "log", "ex", 0, 1e-6, 1e-7, 100))
+
+library(geepack)
+system.time(f1 <- geese(y ~ X - 1, id = rep(1:2000, nt), family = gaussian("log"),
+                        scale.fix = TRUE, b = c(beta_new)))
+system.time(f2 <- geese(y ~ X - 1, id = rep(1:2000, nt), family = gaussian("log"),
+                        corstr = "ex", scale.fix = TRUE, b = c(beta_new)))
+f1$b
+f2$b
+
+geese(y ~ X - 1, id = 1:8000, family = gaussian("log"), scale.fix = TRUE, b = c(beta_new))$b
+
 e
 
 
@@ -268,12 +294,13 @@ using namespace arma;
 // [[Rcpp::export]]
 arma::mat a4(double a, int k) {
   arma::mat out(k, k, fill::zeros);
-  arma::vec tmp(k, arma::fill::value(a));
-  tmp = cumprod(tmp) / a;
-  for (int i = 0; i < k; i++) {
-    out.submat(i, i, k - 1, i) = tmp(span(i, k - 1));
+  arma::mat rout(k, k, fill::eye);
+  arma::vec tmp(k - 1, arma::fill::value(a));
+  tmp = cumprod(tmp);
+  for (int i = 0; i < k - 1; i++) {
+    out.submat(i + 1, i, k - 1, i) = tmp(span(0, k - i - 2));
   }
-  return(out);
+  return(out + out.t() + rout);
 }')
 
 a4(.5, 5)
