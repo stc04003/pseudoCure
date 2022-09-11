@@ -342,17 +342,102 @@ sourceCpp(code = '
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace arma;
 // [[Rcpp::export]]
-arma::mat a4(double a, int k) {
-  arma::mat out(k, k, fill::zeros);
-  arma::mat rout(k, k, fill::eye);
-  arma::vec tmp(k - 1, arma::fill::value(a));
-  tmp = cumprod(tmp);
-  for (int i = 0; i < k - 1; i++) {
-    out.submat(i + 1, i, k - 1, i) = tmp(span(0, k - i - 2));
+arma::uvec a4(int a) {
+  return(randperm(a));
+}
+// [[Rcpp::export]]
+Rcpp::List a5(arma::vec nt, int nCV) {
+  Rcpp::List out(nCV);
+  int N = nt.n_elem;
+  arma::vec index(N, arma::fill::zeros);
+  index(span(1, N - 1)) = cumsum(nt(span(0, N - 2)));
+  arma::vec cvIndex = shuffle(index);
+  arma::vec nTrain(nCV, arma::fill::value(round(N / nCV)));
+  if (sum(nTrain) < N) for (int i = 0; i < N - sum(nTrain); i++) nTrain(i)++;
+  if (sum(nTrain) > N) for (int i = 0; i < sum(nTrain) - N; i++) nTrain(i)--;
+  double offset = 0;
+  for (int i = 0; i < nCV; i++) {
+    out(i) = sort(cvIndex(span(0 + offset, nTrain(i) - 1 + offset)));
+    offset += nTrain(i);
   }
-  return(out + out.t() + rout);
+  return(out);
 }')
 
-a4(.5, 5)
 
-0:4 - 4
+a5(rep(4, 12), 5)
+a5(rep(4, 14), 5)
+a5(rep(4, 15), 5)
+lapply(a5(rep(4, 12), 5), length)
+lapply(a5(rep(4, 14), 5), length)
+lapply(a5(rep(4, 15), 5), length)
+
+sourceCpp(code = '
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+using namespace arma;
+// [[Rcpp::export]]
+Rcpp::List a6(arma::vec idCV, arma::vec id) {
+  Rcpp::List out(2);
+  arma::uvec u;
+  for (int i; i < idCV.n_elem; i++) {
+    u = join_cols(u, find(id == idCV(i)));
+  }
+  arma::vec dummy(id.n_elem, arma::fill::zeros);
+  std::cout << dummy;
+  dummy.elem(u).ones();
+  std::cout << dummy;
+  out(0) = id(u);
+  out(1) = id(find(dummy == 0));
+  return(out);
+}')
+
+
+a6(2:4, rep(1:10, each = 2))
+a7(2:4, rep(1:10, each = 2))
+
+sourceCpp(code = '
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+using namespace arma;
+// [[Rcpp::export]]
+arma::vec a6(arma::vec idCV, arma::vec id) {
+  arma::uvec u;
+  for (int i; i < idCV.n_elem; i++) {
+    u = join_cols(u, find(id == idCV(i)));
+  }
+  arma::vec dummy(id.n_elem, arma::fill::zeros);
+  dummy.elem(u).ones();
+  // return(id(u));
+  return(id(find(dummy == 0)));
+}
+// [[Rcpp::export]]
+arma::vec a7(arma::vec idCV, arma::vec id) {
+  arma::uvec u;
+  for (int i; i < idCV.n_elem; i++) {
+    u = join_cols(u, find(id == idCV(i)));
+  }
+  arma::vec dummy(id.n_elem, arma::fill::zeros);
+  dummy.elem(u).ones();
+  return(id(u));
+}')
+
+
+sourceCpp(code = '
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+using namespace arma;
+// [[Rcpp::export]]
+double a88(arma::vec a) {
+  return(mean(a % a));
+}')
+
+a88(10:1)
+
+microbenchmark(a5(1e5), a6(1e5))
+
+gaussian()$dev.resids
+gaussian("logit")$dev.resids
+gaussian("cloglog")$dev.resids
+gaussian("log")$dev.resids
+
+
