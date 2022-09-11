@@ -45,6 +45,7 @@ lambda <- 0
 ## ##################################################
 library(modifiedPGEE)
 library(geepack)
+library(Rcpp)
 sourceCpp(file = "PGEE.cpp")
 
 y <- data$y
