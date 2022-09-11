@@ -8,8 +8,10 @@ library(survival)
 library(microbenchmark)
 library(Rcpp)
 library(geepack)
+library(MASS)
 
 sourceCpp("RcppCodes.cpp")
+sourceCpp("PGEE.cpp")
 
 data(e1684, package = "smcure")
 head(e1684)
@@ -31,9 +33,12 @@ e1684.inc$curei <- n * (1 - cure) - (n - 1) * (1 - KMs[1:n])
 head(e1684.inc)
 
 fit.inc <- geese(curei ~ AGE + TRT * SEX, data = e1684.inc,
-                jack = TRUE, scale.fix = TRUE, family = gaussian, mean.link = "logit")
+                 jack = TRUE, scale.fix = TRUE, family = gaussian,
+                 mean.link = "logit")
 
 summary(fit.inc)
+
+
 
 ## If we know we are doing latent compoent
 KMs2 <- minSi4(e1684$FAILTIME, e1684$FAILCENS, c(t0, max(e1684$FAILTIME)))
@@ -47,7 +52,19 @@ fit.inc <- geese(curei ~ AGE + TRT * SEX, data = e1684.inc,
 
 summary(fit.inc)
 
+## Use pgee
+fit.inc2 <- gee(y = e1684.inc$curei,
+                X = model.matrix(~ AGE + TRT * SEX, data = e1684.inc),
+                b0 = rep(0, 5), nt = rep(1, 284), pindex = rep(1, 5),
+                glmlink = "logit", corstr = "ind",
+                lambda = 0, eps = 1e-6, tol = 1e-7, maxit = 30)
 
+fit.inc$beta
+fit.inc2$b
+
+with(fit.inc2, ginv(H + 284 * E) %*% M %*% ginv(H + 284 * E))
+fit.inc$vbeta
+     
 ## Pseudo-residual
 e1684.inc$resid <- e1684.inc$curei - 
   1 / (exp(-model.matrix(~ AGE + TRT * SEX, e1684.inc) %*% fit.inc$beta) + 1)
