@@ -37,14 +37,13 @@ X <- model.matrix(~ x1 + x2, data = dat)
 id <- as.numeric(dat$id)
 weights <- rep(1, length(y))
 lambda <- 0
-b0 <- rep(0, ncol(X))
+b0 <- coef(glm(y ~ x1 + x2, data = dat))
 pindex <- rep(0, ncol(X))
 
 fit4 <- paft:::pgeeCpp(X, y, weights, id, lambda, b0, pindex, corstr = "independence")
 fit5 <- paft:::pgeeCpp(X, y, weights, id, lambda, b0, pindex, corstr = "exchangeable")
 fit6 <- paft:::pgeeCpp(X, y, weights, id, lambda, b0, pindex, corstr = "AR1")
 
-cbind(fit4$b1, fit6$b1)
 cbind(fit4$b1, fit5$b1, fit6$b1)
 
 ## new gee
@@ -72,11 +71,70 @@ cbind(fit1$beta, fit2$beta, fit3$beta)
 cbind(fit4$b1, fit6$b1)
 cbind(fit7$b, fit8$b, fit9$b)
 
+## ##########################################################################################
 
+lambda <- .5
+
+fit4 <- paft:::pgeeCpp(X, y, weights, id, lambda, b0, c(0, 1, 1), corstr = "independence", tol = 1e-7)
+fit5 <- paft:::pgeeCpp(X, y, weights, id, lambda, b0, c(0, 1, 1), corstr = "exchangeable", tol = 1e-7)
+fit6 <- paft:::pgeeCpp(X, y, weights, id, lambda, b0, c(0, 1, 1), corstr = "AR1", tol = 1e-7)
+
+fit7 <- gee(y, X, b0, nt, c(1, 0, 0), "identity", "ind", lambda, 1e-6, 1e-7, 50)
+fit8 <- gee(y, X, b0, nt, c(1, 0, 0), "identity", "ex", lambda, 1e-6, 1e-7, 50)
+fit9 <- gee(y, X, b0, nt, c(1, 0, 0), "identity", "ar1", lambda, 1e-6, 1e-7, 50)
+
+cbind(fit4$b1, fit5$b1, fit6$b1)
+cbind(fit7$b, fit8$b, fit9$b)
+
+fit4$E
+fit5$E
+fit6$E
+fit7$E
+fit8$E
+fit9$E
+
+str(fit5)
+str(fit8)
+
+modifiedPGEE::PGEE(y ~ x1 + x2, id = id, data = dat, lambda = .5)$co
+modifiedPGEE::PGEE(y ~ x1 + x2, id = id, data = dat, pindex = 1, lambda = .5)$co
+
+fit4 <- paft:::pgeeCpp(X, y, weights, id, lambda, b0, c(0, 1, 1), corstr = "exchangeable",
+                       maxit = 100, tol = 1e-7)
+fit7 <- gee(y, X, b0, nt, c(1, 0, 0), "identity", "ex", lambda, 1e-6, 1e-7, 99)
+
+str(fit4)
+str(fit7)
+
+
+(q_scad(abs(c(beta_new)), lambda)/(abs(as.vector(beta_new)) + eps))
+
+e
+## ##########################################################################################
 
 sourceCpp(file = "PGEE.cpp")
 
-geeCV(y, X, b0, nt, rep(1, ncol(X)), "identity", "ex", 5, .1, 1e-6, 1e-7, 50)
-
 library(modifiedPGEE)
-CVfit(y ~ x1 + x2, id = id, data = dat, fold = 5, lambda.vec = .1)
+
+cv1 <- function(lambda) {
+    dat0 <- dat
+    dat0$id <- rep(sample(unique(dat0$id)), tabulate(dat0$id))
+    dat0 <- dat0[order(dat0$id),]      
+    tmp <- CVfit(y ~ x1 + x2, id = id, data = dat0, fold = 5, lambda.vec = lambda,
+                 eps = 1e-6, tol = 1e-7, maxiter = 50, family = gaussian("identity"))
+    c(mean(tmp$cv.raw[[1]]), tmp$cvsd)
+}
+
+cv2 <- function(lambda) {
+    tmp <- geeCV(y, X, b0, nt, c(1, 0, 0), "identity", "ind", 5, lambda, 1e-6, 1e-7, 50)
+    c(mean(tmp), sd(tmp / 5))
+}
+
+
+summary(t(replicate(500, cv1(.8))))
+summary(t(replicate(500, cv2(.8))))
+
+miicrobenchmark(cv1(.8), cv2(.8))
+
+
+tmp <- geeCV(y, X, b0, nt, c(1, 0, 0), "identity", "ind", 5, 1:10 / 10, 1e-6, 1e-7, 50)

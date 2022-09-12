@@ -22,12 +22,12 @@ double ahatEx(arma::vec a,
 							arma::vec index) {
 	int n = nt.n_elem;
 	double out = 0;
-	a = a / stddev(a);
+	// a = a / stddev(a);
 	for (int i = 0; i < n; i++) {
 		arma::vec a2 = a(span(index(i), index(i) + nt(i) - 1));
 		out += sum(a2) * sum(a2) - sum(a2 % a2);
 	}
-	return(out / nt(0) / (nt(0) - 1) / n);
+	return(out / nt(0) / (nt(0) - 1) / n / mean(a % a));
 }
 
 double ahatAR1(arma::vec a,
@@ -35,12 +35,12 @@ double ahatAR1(arma::vec a,
 							 arma::vec index) {
 	int n = nt.n_elem;
 	double out = 0;
-	a = a / stddev(a);
+	// a = a / stddev(a);
 	for (int i = 0; i < n; i++) {
 		arma::vec a2 = a(span(index(i), index(i) + nt(i) - 1));
-		out += sum(a(span(0, nt(0) - 2)) % a(span(1, nt(0) - 1)));
+		out += sum(a2(span(0, nt(0) - 2)) % a2(span(1, nt(0) - 1)));
 	}
-	return(out / (nt(0) - 1) / n);
+	return(out / (nt(0) - 1) / n / mean(a % a));
 }
 
 // [[Rcpp::export(rng = false)]]
@@ -102,7 +102,7 @@ Rcpp::List gee(arma::vec y,
 							 std::string corstr,
 							 double lambda, double eps,
 							 double tol, int maxit){
-  Rcpp::List out(6);
+  Rcpp::List out(7);
   int N = nt.n_elem;
   int nx = X.n_cols;
 	int k = nt(0);
@@ -129,13 +129,13 @@ Rcpp::List gee(arma::vec y,
 		arma::mat Rhat(k, k, arma::fill::eye);
 		double ahat = 0;
 		if (corstr == "ex" & k > 1) {
-			ahat = ahatEx(ym, nt, index);
+			ahat = ahatEx(ym / stddev(mu), nt, index);
 			Rhat = Rhat * (1 - ahat) + ahat;
 		}
 		if (corstr == "ar1" & k > 1) {
-			ahat = ahatAR1(ym, nt, index);
-			arma::vec tmp(k - 1, arma::fill::value(ahat));
+			ahat = ahatAR1(ym / stddev(mu), nt, index);
 			arma::mat Rhat2(k, k, arma::fill::zeros);
+			arma::vec tmp(k - 1, arma::fill::value(ahat));
 			tmp = cumprod(tmp);
 			for (int i = 0; i < k - 1; i++) {
 				Rhat2.submat(i + 1, i, k - 1, i) = tmp(span(0, k - i - 2));
@@ -159,10 +159,11 @@ Rcpp::List gee(arma::vec y,
     out(3) = E;
     out(4) = M;
     out(5) = j;
+    out(6) = ahat;
     if(min(abs(b1 - b0)) < tol) break;
     b0 = b1;
   }
-  out.names() = Rcpp::CharacterVector::create("b", "S", "H", "E", "M", "iter");
+  out.names() = Rcpp::CharacterVector::create("b", "S", "H", "E", "M", "iter", "alpha");
   return out;
 }
 
@@ -175,7 +176,7 @@ Rcpp::List gee0(arma::vec y,
 								std::string glmlink,
 								std::string corstr,
 								double tol, int maxit){
-  Rcpp::List out(5);
+  Rcpp::List out(6);
   int N = nt.n_elem;
   int nx = X.n_cols;
 	int k = nt(0);
@@ -199,11 +200,11 @@ Rcpp::List gee0(arma::vec y,
 		arma::mat Rhat(k, k, arma::fill::eye);
 		double ahat = 0;
 		if (corstr == "ex" & k > 1) {
-			ahat = ahatEx(ym, nt, index);
+			ahat = ahatEx(ym / stddev(mu), nt, index);
 			Rhat = Rhat * (1 - ahat) + ahat;
 		}
 		if (corstr == "ar1" & k > 1) {
-			ahat = ahatAR1(ym, nt, index);
+			ahat = ahatAR1(ym / stddev(mu), nt, index);
 			arma::vec tmp(k - 1, arma::fill::value(ahat));
 			arma::mat Rhat2(k, k, arma::fill::zeros);
 			tmp = cumprod(tmp);
@@ -227,10 +228,11 @@ Rcpp::List gee0(arma::vec y,
     out(2) = H;
     out(3) = M;
     out(4) = j;
+    out(5) = ahat;
     if(min(abs(b1 - b0)) < tol) break;
     b0 = b1;
   }
-  out.names() = Rcpp::CharacterVector::create("b", "S", "H", "M", "iter");
+  out.names() = Rcpp::CharacterVector::create("b", "S", "H", "M", "iter", "alpha");
   return out;
 }
 
@@ -266,17 +268,18 @@ arma::vec getID(arma::vec nt) {
 }
 
 // [[Rcpp::export]]
-Rcpp::List geeCV(arma::vec y,
-								 arma::mat X,
-								 arma::vec b0,
-								 arma::vec nt,
-								 arma::vec pindex, // 0 means to penalize
-								 std::string glmlink,
-								 std::string corstr,
-								 int nCV, 
-								 double lambda, double eps,
-								 double tol, int maxit){
-  Rcpp::List out(2);
+arma::mat geeCV(arma::vec y,
+								arma::mat X,
+								arma::vec b0,
+								arma::vec nt,
+								arma::vec pindex, // 0 means to penalize
+								std::string glmlink,
+								std::string corstr,
+								int nCV, 
+								arma::vec lambda,
+								double eps,
+								double tol, int maxit){
+	arma::mat out(nCV, lambda.n_elem, arma::fill::zeros);
   int N = nt.n_elem;
   int nx = X.n_cols;
 	arma::vec cvm(nCV, arma::fill::zeros);
@@ -296,19 +299,22 @@ Rcpp::List geeCV(arma::vec y,
 		arma::mat XTrain = X.rows(find(idTrain == 0));
 		// assume equal cluster size
 		arma::vec ntTrain = nt(span(1, idCV.n_elem));
-		Rcpp::List tmp = gee(yTrain, XTrain, b0, ntTrain, pindex, glmlink, "ind", lambda, eps, tol, maxit);
-		arma::vec b1 = tmp(0);
-		arma::vec eta = XTest * b1;
-		Rcpp::List links;
-		if (glmlink == "identity") links = identityLink(eta);
-		if (glmlink == "log") links = logLink(eta);
-		if (glmlink == "cloglog") links = cloglogLink(eta);
-		if (glmlink == "logit") links = logitLink(eta);
-		arma::vec mu = links(0);
-		arma::vec devResids = yTest - mu;
-		cvm(i) = mean(devResids % devResids);
+		for (int j = 0; j < lambda.n_elem; j++) {			
+			Rcpp::List tmp = gee(yTrain, XTrain, b0, ntTrain, pindex, glmlink, "ind",
+													 lambda(j), eps, tol, maxit);
+			arma::vec b1 = tmp(0);
+			arma::vec eta = XTest * b1;
+			Rcpp::List links;
+			if (glmlink == "identity") links = identityLink(eta);
+			if (glmlink == "log") links = logLink(eta);
+			if (glmlink == "cloglog") links = cloglogLink(eta);
+			if (glmlink == "logit") links = logitLink(eta);
+			arma::vec mu = links(0);
+			arma::vec devResids = yTest - mu;
+			out(i, j) = mean(devResids % devResids);
+		}
 	}
-	out(0) = mean(cvm);
-	out(1) = stddev(cvm);
+		// out(0) = mean(cvm);
+		// out(1) = stddev(cvm / nCV);
 	return(out);
 }
