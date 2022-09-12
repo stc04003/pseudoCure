@@ -1,0 +1,19 @@
+Package: pseudoCure
+Title: A pseudo-observations approach for analyzing survival data with a cure fraction
+Version: 0.0.1
+Authors@R: c(person(given = "Sy Han (Steven)", family = "Chiou",
+	   email = "schiou@utdallas.edu",
+	   role = c("aut", "cre")),
+	   person(given = "Chien-Lin", family = " Su",
+	   email = "chien-lin.su@mail.mcgill.ca", role = "aut"),
+	   person(given = "Feng-Chang", family = " Lin",
+	   email = "flin@bios.unc.edu", role = "aut"))
+Date: 2022-09-12
+Description: A collection of easy-to-use tools for regression analysis of survival data with a cure fraction. The modeling framework is based on the Cox proportional hazards mixture cure model and the bounded cumulative hazard model. The pseudo-observations approach is utilized to assess covariate effects and embedded in the variable selection procedure. 
+License: GPL (>= 2)
+Depends: R (>= 4.2.0)
+LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 7.2.1
+NeedsCompilation: yes
+Packaged: 2022-09-12 10:41:51 UTC; schiou
+Encoding: UTF-8

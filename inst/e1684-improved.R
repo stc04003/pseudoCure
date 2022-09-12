@@ -2,6 +2,8 @@
 ## Load and prepare the Melanoma data 
 ## If latency component is involved, call minSi4(), otherwise, call minSi()
 ## If short-term component is involved, call minSi4(), otherwise, call minSi()
+## minSi4() -> pseudoKM1
+## minSi() -> pseudoKM
 ## ###########################################################################
 
 library(survival)
@@ -177,3 +179,7 @@ ggplot(subset(e1684.short, t0 %in% t0[2:5 * 2]),
         axis.ticks.x = element_blank(),
         legend.title = element_blank(), 
         legend.position = "bottom")
+
+
+library(intsurv)
+cox_cure
