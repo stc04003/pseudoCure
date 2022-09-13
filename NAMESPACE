@@ -2,6 +2,7 @@
 
 export(pCure)
 export(pCure.control)
+importFrom(MASS,ginv)
 importFrom(stats,model.frame)
 importFrom(stats,model.matrix)
 useDynLib(pseudoCure)

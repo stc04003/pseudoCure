@@ -31,6 +31,7 @@
 #' @export
 pCure <- function(formula1, formula2, time, status, data, subset, t0, 
                   model = c("mixture", "promotion"), control = list()) {
+    model <- match.arg(model)
     if (missing(formula1)) stop("Argument 'formula' is required.")
     if (missing(time)) stop("Argument 'time' is required.")
     if (missing(status)) stop("Argument 'status' is required.")
@@ -48,6 +49,7 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     mf$drop.unused.levels <- TRUE
     mf[[1L]] <- quote(stats::model.frame)
     mf <- eval(mf, parent.frame())
+    xlevel1 <- xlevel2 <- .getXlevels(attr(mf, "terms"), mf)
     time <- as.numeric(model.extract(mf, time))
     status <- as.numeric(model.extract(mf, status))
     mm1 <- mm2 <- stats::model.matrix(formula1, data = mf)
@@ -58,6 +60,7 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
         mf$drop.unused.levels <- TRUE
         mf[[1L]] <- quote(stats::model.frame)
         mf <- eval(mf, parent.frame())
+        xlevel2 <- .getXlevels(attr(mf, "terms"), mf)
         mm2 <- stats::model.matrix(formula2, data = mf)
         mm2 <- mm2[, colnames(mm2) != "(Intercept)"]   
     }
@@ -68,9 +71,15 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     if (!all(namc %in% names(ctrl))) 
         stop("unknown names in control: ", namc[!(namc %in% names(ctrl))])
     ctrl[namc] <- control
-    if (model == "mixture") fit <- fitPHMC(mm1, mm2, time, status, t0, control)
-    if (model == "promotion") fit <- fitPHPH(mm1, mm2, time, status, t0, control)
-    fit
+    if (model == "mixture") out <- fitPHMC(mm1, mm2, time, status, t0, ctrl)
+    if (model == "promotion") out <- fitPHPH(mm1, mm2, time, status, t0, ctrl)
+    out$t0 <- t0
+    out$call <- match.call()
+    out$xlevel1 <- xlevel1
+    out$xlevel2 <- xlevel2
+    class(out) <- "pCure"
+    out <- out[order(names(out))]
+    return(out)
 }
 
 

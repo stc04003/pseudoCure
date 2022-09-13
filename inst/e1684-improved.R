@@ -97,7 +97,8 @@ curei <- KMs2[length(t0) + 1, 1:n]
 
 e1684.lat <- e1684[rep(1:n, each = length(t0)),]
 e1684.lat$id <- rep(1:n, each = length(t0))
-e1684.lat$Si <- n * (S - cure) / (1 - cure) - c((n - 1) * (Si - curei) / (1 - curei))
+## e1684.lat$Si <- n * (S - cure) / (1 - cure) - c((n - 1) * (Si - curei) / (1 - curei))
+e1684.lat$Si <- n * (S - cure) / (1 - cure) - c((n - 1) * t((t(Si) - curei) / (1 - curei)))
 e1684.lat$Fi <- 1 - e1684.lat$Si
 e1684.lat$t <- as.factor(rep(t0, n))
 rownames(e1684.lat) <- NULL

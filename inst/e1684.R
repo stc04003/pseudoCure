@@ -4,12 +4,12 @@
 library(survival)
 library(microbenchmark)
 library(Rcpp)
-
-sourceCpp("RcppCodes.cpp")
+library(pseudoCure)
 
 data(e1684, package = "smcure")
-head(e1684)
 e1684 <- na.omit(e1684)
+e1684$SEX2 <- as.factor(e1684$SEX)
+e1684$TRT2 <- as.factor(e1684$TRT)
 
 ## #######################################################################
 ## EM-based approach for mixture cure model
@@ -33,6 +33,16 @@ newDat
 ## #######################################################################
 ## Pseudo-observation approach for mixture cure model
 ## #######################################################################
+
+head(e1684)
+
+foo <- pCure(~ AGE + TRT * SEX, ~ AGE + TRT * SEX, FAILTIME, FAILCENS, e1684)
+foo1 <- pCure(~ AGE + TRT * SEX, ~ AGE + TRT * SEX, FAILTIME, FAILCENS, e1684, model = 'p')
+
+
+str(pCure(~ AGE + TRT * SEX, ~ AGE + TRT * SEX, FAILTIME, FAILCENS, e1684))
+str(pCure(~ AGE + TRT * SEX2, ~ AGE + TRT * SEX, FAILTIME, FAILCENS, e1684))
+
 
 ## Incidence component
 n <- nrow(e1684)
@@ -107,6 +117,16 @@ ggplot(subset(e1684.lat, t0 %in% t0[2:5 * 2]),
         legend.title = element_blank(), 
         legend.position = "bottom")
 
+fit.inc$b
+drop(foo$fit1$b)
+
+fit.lat$b
+drop(foo$fit2$b)
+
+max(abs(fit.inc$b - drop(foo$fit1$b)))
+max(abs(fit.lat$b - drop(foo$fit2$b)))
+
+e
 ## #######################################################################
 ## Pseudo-observation approach for Bounded cumulative hazard model
 ## #######################################################################
@@ -169,3 +189,17 @@ ggplot(subset(e1684.short, t0 %in% t0[2:5 * 2]),
         axis.ticks.x = element_blank(),
         legend.title = element_blank(), 
         legend.position = "bottom")
+
+
+
+fit.long$b
+drop(foo1$fit1$b)
+
+fit.short$b
+drop(foo1$fit2$b)
+
+max(abs(fit.long$b - drop(foo1$fit1$b)))
+max(abs(fit.short$b - drop(foo1$fit2$b)))
+
+with(foo1$fit1, ginv(H) %*% M %*% ginv(H))
+fit.long$vbeta
