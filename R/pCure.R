@@ -22,13 +22,14 @@
 #' @param t0 A vector of times, where the pseudo-observations are constructed.
 #' When not specified, the default values are the 10, 20, ..., 90, 95 percentiles of
 #' uncensored event times.
-#' @param lambda An option for specifying the tuning parameter used in penalization.
+#' @param lambda1,lambda2  An option for specifying the tuning parameter used in penalization.
 #' When this is unspecified or has a code{NULL} value,
 #' penalization will not be applied and the \code{pCure} fit will uses all covariates
 #' specified in the formulas.
 #' Alternatively, this can be specified as a numeric vector of non-negative values.
-#' @param penality A character string specifying the penality function.
+#' @param penality1,penality2 A character string specifying the penality function.
 #' The available options are code{"scad"} and code{"lasso"}.
+#' @param exclude1,exclude2 A character string specifying 
 #' @param control A list of control parameters. See detail.
 #'
 #' @importFrom stats model.frame model.matrix
@@ -36,9 +37,13 @@
 #' @export
 pCure <- function(formula1, formula2, time, status, data, subset, t0, 
                   model = c("mixture", "promotion"),
-                  lambda = NULL, penalty = c("scad", "lasso"),
+                  lambda1 = NULL, lambda2 = NULL,
+                  penalty1 = c("scad", "lasso"), penalty2 = c("scad", "lasso"),
+                  exclude1 = NULL, exclude2 = NULL, 
                   control = list()) {
     model <- match.arg(model)
+    penalty1 <- match.arg(penalty1)
+    penalty2 <- match.arg(penalty2)
     if (missing(formula1)) stop("Argument 'formula' is required.")
     if (missing(time)) stop("Argument 'time' is required.")
     if (missing(status)) stop("Argument 'status' is required.")
@@ -78,8 +83,12 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     if (!all(namc %in% names(ctrl))) 
         stop("unknown names in control: ", namc[!(namc %in% names(ctrl))])
     ctrl[namc] <- control
-    if (model == "mixture") out <- fitPHMC(mm1, mm2, time, status, t0, ctrl)
-    if (model == "promotion") out <- fitPHPH(mm1, mm2, time, status, t0, ctrl)
+    if (model == "mixture")
+        out <- fitPHMC(mm1, mm2, time, status, t0,
+                       lambda1, penalty1, exclude1, lambda2, penalty2, exclude2, ctrl)
+    if (model == "promotion")
+        out <- fitPHPH(mm1, mm2, time, status, t0,
+                       lambda1, penalty1, exclude1, lambda2, penalty2, exclude2, ctrl)
     out$t0 <- t0
     out$call <- match.call()
     out$xlevel1 <- xlevel1

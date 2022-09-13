@@ -201,5 +201,6 @@ drop(foo1$fit2$b)
 max(abs(fit.long$b - drop(foo1$fit1$b)))
 max(abs(fit.short$b - drop(foo1$fit2$b)))
 
+library(MASS)
 with(foo1$fit1, ginv(H) %*% M %*% ginv(H))
 fit.long$vbeta

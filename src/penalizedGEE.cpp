@@ -119,7 +119,7 @@ Rcpp::List pgee(arma::vec y,
   arma::vec b1 = b0;
   for (int j = 0; j <= maxit; j++) {
     arma::vec eta = X * b0;
-		arma::vec E1;
+		arma::vec E1(nx, nx, arma::fill::zeros);
 		if (penalty == "scad")
 			E1 = qscad(abs(b0), lambda) / (abs(b0) + eps);
 		if (penalty == "lasso")
@@ -188,7 +188,7 @@ Rcpp::List gee(arma::vec y,
 							 std::string glmlink,
 							 std::string corstr,
 							 double tol, int maxit){
-  Rcpp::List out(6);
+  Rcpp::List out(7);
   int N = nt.n_elem;
   int nx = X.n_cols;
 	int k = nt(0);
@@ -238,13 +238,15 @@ Rcpp::List gee(arma::vec y,
     out(0) = b1;
     out(1) = S;
     out(2) = H;
-    out(3) = M;
-    out(4) = j;
-    out(5) = ahat;
+    out(4) = M;
+    out(5) = j;
+    out(6) = ahat;
     if(min(abs(b1 - b0)) < tol) break;
     b0 = b1;
   }
-  out.names() = Rcpp::CharacterVector::create("b", "S", "H", "M", "iter", "alpha");
+	arma::mat E(nx, nx, arma::fill::zeros);
+	out(3) = E;
+  out.names() = Rcpp::CharacterVector::create("b", "S", "H", "E", "M", "iter", "alpha");
   return out;
 }
 
