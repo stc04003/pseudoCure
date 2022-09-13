@@ -86,10 +86,16 @@ arma::vec qscad(arma::vec b, double lambda) {
   double a = 3.7;
   arma::vec dif = a * lambda - b;
   dif.elem(find(dif < 0)).zeros();
-  arma::vec out(b.n_elem);
-  out.fill(lambda);
+  arma::vec out(b.n_elem, arma::fill::value(lambda));
+  // out.fill(lambda);
   arma::uvec ind = find(b > lambda);
   out(ind) = dif(ind) / (a - 1);
+  return(out);
+}
+
+arma::vec qlasso(arma::vec b, double lambda) {
+  arma::vec out(b.n_elem, arma::fill::value(lambda));
+  out.elem(find(b > lambda)).zeros();
   return(out);
 }
 
@@ -100,6 +106,7 @@ Rcpp::List pgee(arma::vec y,
 								arma::vec nt,
 								arma::vec pindex, // 0 means to penalize
 								std::string glmlink,
+								std::string penalty,
 								std::string corstr,
 								double lambda, double eps,
 								double tol, int maxit){
@@ -112,7 +119,11 @@ Rcpp::List pgee(arma::vec y,
   arma::vec b1 = b0;
   for (int j = 0; j <= maxit; j++) {
     arma::vec eta = X * b0;
-    arma::vec E1 = qscad(abs(b0), lambda) / (abs(b0) + eps);
+		arma::vec E1;
+		if (penalty == "scad")
+			E1 = qscad(abs(b0), lambda) / (abs(b0) + eps);
+		if (penalty == "lasso")
+		  E1 = qlasso(abs(b0), lambda) / (abs(b0) + eps);
     E1.elem(find(pindex > 0)).zeros();
     arma::mat E = diagmat(E1);
     arma::mat S(nx, 1, arma::fill::zeros);
@@ -276,6 +287,7 @@ arma::mat geeCV(arma::vec y,
 								arma::vec nt,
 								arma::vec pindex, // 0 means to penalize
 								std::string glmlink,
+								std::string penalty,
 								std::string corstr,
 								int nCV, 
 								arma::vec lambda,
@@ -300,7 +312,7 @@ arma::mat geeCV(arma::vec y,
 		// assume equal cluster size
 		arma::vec ntTrain = nt(span(1, idCV.n_elem));
 		for (int j = 0; j < (int) lambda.n_elem; j++) {			
-			Rcpp::List tmp = pgee(yTrain, XTrain, b0, ntTrain, pindex, glmlink, "ind",
+			Rcpp::List tmp = pgee(yTrain, XTrain, b0, ntTrain, pindex, glmlink, penalty, "ind",
 														lambda(j), eps, tol, maxit);
 			arma::vec b1 = tmp(0);
 			arma::vec eta = XTest * b1;

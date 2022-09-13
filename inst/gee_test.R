@@ -2,6 +2,7 @@ library(paft)
 library(geepack)
 library(Rcpp)
 library(microbenchmark)
+library(pseudoCure)
 
 sourceCpp(file = "PGEE.cpp")
 
@@ -137,4 +138,5 @@ summary(t(replicate(500, cv2(.8))))
 miicrobenchmark(cv1(.8), cv2(.8))
 
 
-tmp <- geeCV(y, X, b0, nt, c(1, 0, 0), "identity", "ind", 5, 1:10 / 10, 1e-6, 1e-7, 50)
+tmp <- pseudoCure:::geeCV(y, X, b0, nt, c(1, 0, 0),
+                          "identity", "scad", "ind", 5, 1:10 / 10, 1e-6, 1e-7, 50)

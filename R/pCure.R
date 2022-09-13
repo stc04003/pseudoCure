@@ -1,5 +1,3 @@
-
-
 #' Cure Rate Model with pseudo-observation approach
 #'
 #' Fits either a mixture cure model or a bounded cumulative hazard (promotion time) model
@@ -23,14 +21,23 @@
 #' correspond to the mixture cure model and the bounded cumulative model, respectively.
 #' @param t0 A vector of times, where the pseudo-observations are constructed.
 #' When not specified, the default values are the 10, 20, ..., 90, 95 percentiles of
-#' uncensored event times. 
+#' uncensored event times.
+#' @param lambda An option for specifying the tuning parameter used in penalization.
+#' When this is unspecified or has a code{NULL} value,
+#' penalization will not be applied and the \code{pCure} fit will uses all covariates
+#' specified in the formulas.
+#' Alternatively, this can be specified as a numeric vector of non-negative values.
+#' @param penality A character string specifying the penality function.
+#' The available options are code{"scad"} and code{"lasso"}.
 #' @param control A list of control parameters. See detail.
 #'
 #' @importFrom stats model.frame model.matrix
 #'
 #' @export
 pCure <- function(formula1, formula2, time, status, data, subset, t0, 
-                  model = c("mixture", "promotion"), control = list()) {
+                  model = c("mixture", "promotion"),
+                  lambda = NULL, penalty = c("scad", "lasso"),
+                  control = list()) {
     model <- match.arg(model)
     if (missing(formula1)) stop("Argument 'formula' is required.")
     if (missing(time)) stop("Argument 'time' is required.")
