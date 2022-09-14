@@ -73,24 +73,24 @@ BEGIN_RCPP
 END_RCPP
 }
 // pseudoKM
-arma::vec pseudoKM(const arma::vec Time, const arma::vec censor);
+arma::vec pseudoKM(arma::vec Time, arma::vec censor);
 RcppExport SEXP _pseudoCure_pseudoKM(SEXP TimeSEXP, SEXP censorSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const arma::vec >::type Time(TimeSEXP);
-    Rcpp::traits::input_parameter< const arma::vec >::type censor(censorSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type Time(TimeSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type censor(censorSEXP);
     rcpp_result_gen = Rcpp::wrap(pseudoKM(Time, censor));
     return rcpp_result_gen;
 END_RCPP
 }
 // pseudoKM1
-arma::mat pseudoKM1(const arma::vec Time, const arma::vec censor, const arma::vec Q);
+arma::mat pseudoKM1(arma::vec Time, arma::vec censor, arma::vec Q);
 RcppExport SEXP _pseudoCure_pseudoKM1(SEXP TimeSEXP, SEXP censorSEXP, SEXP QSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
-    Rcpp::traits::input_parameter< const arma::vec >::type Time(TimeSEXP);
-    Rcpp::traits::input_parameter< const arma::vec >::type censor(censorSEXP);
-    Rcpp::traits::input_parameter< const arma::vec >::type Q(QSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type Time(TimeSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type censor(censorSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type Q(QSEXP);
     rcpp_result_gen = Rcpp::wrap(pseudoKM1(Time, censor, Q));
     return rcpp_result_gen;
 END_RCPP

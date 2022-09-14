@@ -23,10 +23,29 @@ Teeth1 <- do.call(rbind, lapply(split(Teeth, Teeth$id),
 ## Test for cure
 npcure::testmz(time, event, Teeth1)
 
+fn <- ~ x52 + x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 + 
+    x11 + x12 + x13 + x14 + x15 + x16 + 
+    x20 + x21 + x23 + x24 + x25 + x26 + x27 + x28 + x29 + 
+    x30 + x32 + x33 + x34 + x35 + x36 + x37 + x38 + x39 + 
+    x40 + x42 + x43 + x44 + x45 + x46 + x48 + x49 + x50 + x51
+
+## library(Rcpp)
+library(pseudoCure)
+
+system.time(foo1 <- pCure(fn, fn, time, event, Teeth1))
+system.time(foo2 <- pCure(fn, fn, time, event, Teeth1, model = 'p'))
+system.time(foo3 <- pCure(fn, fn, time, event, Teeth1, lambda1 = .02, lambda2 = .01))
+system.time(foo4 <- pCure(fn, fn, time, event, Teeth1, model = 'p', lambda1 = .02, lambda2 = .01))
+
+system.time(foo8 <- pCure(fn, fn, time, event, Teeth1, lambda1 = "auto", lambda2 = "auto"))
+system.time(foo9 <- pCure(fn, fn, time, event, Teeth1,
+                          model = 'p', lambda1 = "auto", lambda2 = "auto"))
 
 ## #######################################################################
 ## Pseudo-observation approach for mixture cure model
 ## #######################################################################
+
+now <- Sys.time()
 n <- nrow(Teeth1)
 tmax <- max(Teeth1$time[Teeth1$event > 0])
 library(survival)
@@ -54,6 +73,7 @@ fit.inc <- geese(as.formula(paste("curei ~", fn)[2]),
                  family = gaussian, mean.link = "logit")
 
 summary(fit.inc)
+then1 <- Sys.time()
 
 ## Variable selection
 ## to install modifiedPGEE from source code

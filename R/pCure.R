@@ -27,19 +27,21 @@
 #' penalization will not be applied and the \code{pCure} fit will uses all covariates
 #' specified in the formulas.
 #' Alternatively, this can be specified as a numeric vector of non-negative values.
-#' @param penality1,penality2 A character string specifying the penality function.
+#' @param penalty1,penalty2 A character string specifying the penality function.
 #' The available options are code{"scad"} and code{"lasso"}.
 #' @param exclude1,exclude2 A character string specifying variables to
 #' exclude in variable selection.
 #' @param nfolds An optional integer value specifying the number of folds.
-#' The default value is 10. 
+#' The default value is 5. 
 #' @param control A list of control parameters. See detail.
 #'
-#' @importFrom stats model.frame model.matrix
+#' @importFrom stats model.frame model.matrix model.extract 
+#' @importFrom stats .getXlevels formula pnorm quantile runif sd symnum
 #'
+#' @example inst/examples/ex_pCure.R
 #' @export
 pCure <- function(formula1, formula2, time, status, data, subset, t0, 
-                  model = c("mixture", "promotion"), nfolds = 10,
+                  model = c("mixture", "promotion"), nfolds = 5,
                   lambda1 = NULL, exclude1 = NULL, penalty1 = c("scad", "lasso"), 
                   lambda2 = NULL, exclude2 = NULL, penalty2 = c("scad", "lasso"),
                   control = list()) {
@@ -158,7 +160,7 @@ pCure.control <- function(binit1 = NULL, binit2 = NULL,
 #' 
 #' @noRd
 auto.lambda <- function(mm1, mm2, time, status, t0, ctrl) {
-    trys <- exp(-5:10)
+    trys <- exp(-7:10)
     lambda1.max <- lambda2.max <- max(trys)
     for (i in 1:length(trys)) {
         ctrl$lambda1 <- ctrl$lambda2 <- trys[i]
@@ -170,6 +172,6 @@ auto.lambda <- function(mm1, mm2, time, status, t0, ctrl) {
         if (all(abs(tmp$fit2$b) < 1e-6)) lambda2.max <- trys[i]
         if (max(lambda1.max, lambda2.max) < max(trys)) break
     }
-    list(lambda1 = exp(seq(log(1e-04), lambda1.max, length.out = ctrl$nlambda1)),
-         lambda2 = exp(seq(log(1e-04), lambda2.max, length.out = ctrl$nlambda2)))
+    list(lambda1 = exp(seq(log(1e-04), log(lambda1.max), length.out = ctrl$nlambda1)),
+         lambda2 = exp(seq(log(1e-04), log(lambda2.max), length.out = ctrl$nlambda2)))
 }

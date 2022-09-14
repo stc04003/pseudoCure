@@ -38,7 +38,8 @@ fitPHPH <- function(X1, X2, time, status, t0, control) {
     X22 <- cbind(model.matrix(~ 0 + as.factor(rep(t0, length(time)))),
                  X2[rep(1:nrow(X2), each = length(t0)),])
     colnames(X22) <- c(paste("t", seq_along(t0), sep = ""), colnames(X2))
-    if (is.null(control$binit2)) control$binit2 <- rep(0, ncol(X22))
+    if (is.null(control$binit2)) control$binit2 <- runif(ncol(X22), -.001, .001)
+    ## control$binit2 <- rep(0, ncol(X22))
     if (is.null(control$exclude2)) control$exclude2 <- rep(0, ncol(X22))
     if (is.null(control$lambda2))
         fit2 <- gee(Fi, X22, control$binit2, nt, "cloglog",

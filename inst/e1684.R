@@ -212,9 +212,17 @@ fit.long$vbeta
 ## Prints
 ## #######################################################################
 
+library(pseudoCure)
+
+data(e1684, package = "smcure")
+e1684 <- na.omit(e1684)
+e1684$SEX2 <- as.factor(e1684$SEX)
+e1684$TRT2 <- as.factor(e1684$TRT)
+
 head(e1684)
 
 (foo1 <- pCure(~ AGE + TRT * SEX, ~ AGE + TRT * SEX, FAILTIME, FAILCENS, e1684))
+
 (foo2 <- pCure(~ AGE + TRT * SEX, ~ AGE + TRT * SEX, FAILTIME, FAILCENS, e1684, model = 'p'))
 (foo3 <- pCure(~ AGE + TRT * SEX, ~ AGE + TRT * SEX, FAILTIME, FAILCENS, e1684,
                lambda1 = .02, lambda2 = .01))
@@ -234,12 +242,18 @@ summary(foo5)
                lambda1 = 1:10 / 100, lambda2 = 1:10 / 100))
 summary(foo6)
 
-(foo7 <- pCure(~ AGE + TRT * SEX, ~ AGE + TRT * SEX, FAILTIME, FAILCENS, e1684,
-               lambda1 = "auto", lambda2 = "auto"))
+system.time(foo7 <- pCure(~ AGE + TRT * SEX, ~ AGE + TRT * SEX, FAILTIME, FAILCENS, e1684,
+                          lambda1 = "auto", lambda2 = "auto"))
 summary(foo7)
 
 
-(foo8 <- pCure(~ AGE + TRT * SEX, ~ AGE + TRT * SEX, FAILTIME, FAILCENS, e1684,
-               lambda1 = "auto", lambda2 = "auto"))
+system.time(foo8 <- pCure(~ AGE + TRT * SEX, ~ AGE + TRT * SEX, FAILTIME, FAILCENS, e1684,
+                          lambda1 = "auto", lambda2 = "auto"))
 summary(foo8)
+
+foo8$fit1$lambda
+
+system.time(foo9 <- pCure(~ AGE + TRT * SEX, ~ AGE + TRT * SEX, FAILTIME, FAILCENS, e1684,
+                          lambda1 = foo8$control$lambda1, lambda2 = foo8$control$lambda2))
+summary(foo9)
 

@@ -19,8 +19,8 @@ arma::mat matvec(arma::mat x, arma::vec y) {
 // Functions to calculate parameter in variance-covariance matrix
 // Those functions assume equal cluster size
 double ahatEx(arma::vec a,
-	      arma::vec nt,
-	      arma::vec index) {
+							arma::vec nt,
+							arma::vec index) {
   int n = nt.n_elem;
   double out = 0;
   for (int i = 0; i < n; i++) {
@@ -31,8 +31,8 @@ double ahatEx(arma::vec a,
 }
 
 double ahatAR1(arma::vec a,
-	       arma::vec nt,
-	       arma::vec index) {
+							 arma::vec nt,
+							 arma::vec index) {
   int n = nt.n_elem;
   double out = 0;
   for (int i = 0; i < n; i++) {
@@ -101,15 +101,17 @@ arma::vec qlasso(arma::vec b, double lambda) {
 
 // [[Rcpp::export(rng = false)]]
 Rcpp::List pgee(arma::vec y,
-		arma::mat X,
-		arma::vec b0,
-		arma::vec nt,
-		arma::vec pindex, // 0 means to penalize
-		std::string glmlink,
-		std::string penalty,
-		std::string corstr,
-		double lambda, double eps,
-		double tol, int maxit){
+								arma::mat X,
+								arma::vec b0,
+								arma::vec nt,
+								arma::vec pindex, // 0 means to penalize
+								std::string glmlink,
+								std::string penalty,
+								std::string corstr,
+								double lambda,
+								double eps,
+								double tol,
+								int maxit){
   Rcpp::List out(7);
   int N = nt.n_elem;
   int nx = X.n_cols;
@@ -150,7 +152,7 @@ Rcpp::List pgee(arma::vec y,
       arma::vec tmp(k - 1, arma::fill::value(ahat));
       tmp = cumprod(tmp);
       for (int i = 0; i < k - 1; i++) {
-	Rhat2.submat(i + 1, i, k - 1, i) = tmp(span(0, k - i - 2));
+				Rhat2.submat(i + 1, i, k - 1, i) = tmp(span(0, k - i - 2));
       }
       Rhat = Rhat + Rhat2 + Rhat2.t();
     }
@@ -182,12 +184,13 @@ Rcpp::List pgee(arma::vec y,
 // no penality version
 // [[Rcpp::export(rng = false)]]
 Rcpp::List gee(arma::vec y,
-	       arma::mat X,
-	       arma::vec b0,
-	       arma::vec nt,
-	       std::string glmlink,
-	       std::string corstr,
-	       double tol, int maxit){
+							 arma::mat X,
+							 arma::vec b0,
+							 arma::vec nt,
+							 std::string glmlink,
+							 std::string corstr,
+							 double tol,
+							 int maxit){
   Rcpp::List out(7);
   int N = nt.n_elem;
   int nx = X.n_cols;
@@ -221,7 +224,7 @@ Rcpp::List gee(arma::vec y,
       arma::mat Rhat2(k, k, arma::fill::zeros);
       tmp = cumprod(tmp);
       for (int i = 0; i < k - 1; i++) {
-	Rhat2.submat(i + 1, i, k - 1, i) = tmp(span(0, k - i - 2));
+				Rhat2.submat(i + 1, i, k - 1, i) = tmp(span(0, k - i - 2));
       }
       Rhat = Rhat + Rhat2 + Rhat2.t();
     }
@@ -294,7 +297,8 @@ arma::mat pgeeCV(arma::vec y,
 								 int nCV, 
 								 arma::vec lambda,
 								 double eps,
-								 double tol, int maxit){
+								 double tol,
+								 int maxit){
   arma::mat out(nCV, lambda.n_elem, arma::fill::zeros);
   arma::vec cvm(nCV, arma::fill::zeros);
   arma::vec id = getID(nt);

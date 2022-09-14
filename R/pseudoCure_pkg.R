@@ -9,6 +9,8 @@
 #' @aliases pseudoCure-packages
 #'
 #' @docType package
-#' @useDynLib pseudoCure
+#' @useDynLib pseudoCure, .registration = TRUE
+#'
+#' @importFrom Rcpp evalCpp
 "_PACKAGE"
 NULL

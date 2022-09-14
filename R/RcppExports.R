@@ -2,22 +2,22 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 pgee <- function(y, X, b0, nt, pindex, glmlink, penalty, corstr, lambda, eps, tol, maxit) {
-    .Call('_pseudoCure_pgee', PACKAGE = 'pseudoCure', y, X, b0, nt, pindex, glmlink, penalty, corstr, lambda, eps, tol, maxit)
+    .Call(`_pseudoCure_pgee`, y, X, b0, nt, pindex, glmlink, penalty, corstr, lambda, eps, tol, maxit)
 }
 
 gee <- function(y, X, b0, nt, glmlink, corstr, tol, maxit) {
-    .Call('_pseudoCure_gee', PACKAGE = 'pseudoCure', y, X, b0, nt, glmlink, corstr, tol, maxit)
+    .Call(`_pseudoCure_gee`, y, X, b0, nt, glmlink, corstr, tol, maxit)
 }
 
 pgeeCV <- function(y, X, b0, nt, pindex, glmlink, penalty, corstr, nCV, lambda, eps, tol, maxit) {
-    .Call('_pseudoCure_pgeeCV', PACKAGE = 'pseudoCure', y, X, b0, nt, pindex, glmlink, penalty, corstr, nCV, lambda, eps, tol, maxit)
+    .Call(`_pseudoCure_pgeeCV`, y, X, b0, nt, pindex, glmlink, penalty, corstr, nCV, lambda, eps, tol, maxit)
 }
 
 pseudoKM <- function(Time, censor) {
-    .Call('_pseudoCure_pseudoKM', PACKAGE = 'pseudoCure', Time, censor)
+    .Call(`_pseudoCure_pseudoKM`, Time, censor)
 }
 
 pseudoKM1 <- function(Time, censor, Q) {
-    .Call('_pseudoCure_pseudoKM1', PACKAGE = 'pseudoCure', Time, censor, Q)
+    .Call(`_pseudoCure_pseudoKM1`, Time, censor, Q)
 }
 

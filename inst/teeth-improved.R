@@ -4,6 +4,8 @@
 ## If short-term component is involved, call minSi4(), otherwise, call minSi()
 ## ###########################################################################
 
+setwd('/home/schiou/RPackages/pseudoCure/inst')
+
 library(survival)
 library(microbenchmark)
 library(Rcpp)
@@ -31,17 +33,19 @@ Teeth1 <- do.call(rbind, lapply(split(Teeth, Teeth$id), function(d) d[which.min(
 ## Test for cure
 npcure::testmz(time, event, Teeth1)
 
-n <- nrow(Teeth1)
-tmax <- max(Teeth1$time[Teeth1$event > 0])
-t0 <- quantile(Teeth1$time[Teeth1$event > 0], c(1:9 / 10, .95))
-
 
 ## ####################################
 ## Without variable selection
 ## ####################################
 
+now <- Sys.time()
+
+n <- nrow(Teeth1)
+tmax <- max(Teeth1$time[Teeth1$event > 0])
+t0 <- quantile(Teeth1$time[Teeth1$event > 0], c(1:9 / 10, .95))
+
 ## Incidence component
-KMs2 <- minSi4(Teeth$time, Teeth$event, c(t0, max(Teeth$time)))
+KMs2 <- minSi4(Teeth1$time, Teeth1$event, c(t0, max(Teeth1$time)))
 S <- KMs2[1:length(t0), n + 1]
 Si <- KMs2[1:length(t0), 1:n]
 cure <- KMs2[length(t0) + 1, n + 1]
@@ -55,10 +59,10 @@ head(Teeth.inc[,1:10])
 names(Teeth.inc)
 
 fn <- ~ x52 + x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 + 
-  x11 + x12 + x13 + x14 + x15 + x16 + 
-  x20 + x21 + x23 + x24 + x25 + x26 + x27 + x28 + x29 + 
-  x30 + x32 + x33 + x34 + x35 + x36 + x37 + x38 + x39 + 
-  x40 + x42 + x43 + x44 + x45 + x46 + x48 + x49 + x50 + x51
+    x11 + x12 + x13 + x14 + x15 + x16 + 
+    x20 + x21 + x23 + x24 + x25 + x26 + x27 + x28 + x29 + 
+    x30 + x32 + x33 + x34 + x35 + x36 + x37 + x38 + x39 + 
+    x40 + x42 + x43 + x44 + x45 + x46 + x48 + x49 + x50 + x51
 
 fit.inc <- geese(as.formula(paste("curei ~", fn)[2]),
                  data = Teeth.inc, jack = TRUE, scale.fix = TRUE,
@@ -66,16 +70,14 @@ fit.inc <- geese(as.formula(paste("curei ~", fn)[2]),
 
 summary(fit.inc)
 
-
-
-
+then1 <- Sys.time()
 
 ## Latency component
 
 Teeth.lat <- data.frame(
     id = rep(1:n, each = length(t0)),
     Si = n * (S - cure) / (1 - cure) - c((n - 1) * (Si - curei) / (1 - curei)),
-    Teeth[rep(1:n, each = length(t0)),],
+    Teeth1[rep(1:n, each = length(t0)),],
     t = kronecker(rep(1, n), diag(length(t0))))
 Teeth.lat$Fi <- 1 - Teeth.lat$Si
 rownames(Teeth.lat) <- NULL
@@ -94,3 +96,7 @@ fit.lat <- geese(as.formula(paste("Fi ~", fn2)[2]), data = Teeth.lat, id = id,
                 jack = TRUE, scale.fix = TRUE, family = gaussian, mean.link = "cloglog")
 summary(fit.lat)
 
+then2 <- Sys.time()
+
+c(now, then1, then2)
+then2 - now

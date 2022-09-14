@@ -427,17 +427,19 @@ sourceCpp(code = '
 // [[Rcpp::depends(RcppArmadillo)]]
 using namespace arma;
 // [[Rcpp::export]]
-double a88(arma::vec a) {
-  return(mean(a % a));
+arma::mat a1(arma::mat a) {
+  return(pinv(a, .01));
+}
+// [[Rcpp::export]]
+arma::mat a2(arma::mat a) {
+  arma::mat aa = eye(a.n_rows, a.n_cols);
+  return(solve(a, aa, solve_opts::fast));
 }')
 
-a88(10:1)
+a1(matrix(1:25, 5))
+a2(matrix(1:25, 5))
 
-microbenchmark(a5(1e5), a6(1e5))
+library(microbenchmark)
 
-gaussian()$dev.resids
-gaussian("logit")$dev.resids
-gaussian("cloglog")$dev.resids
-gaussian("log")$dev.resids
-
+microbenchmark(a1(matrix(1:25, 5)), invisible(a2(matrix(1:25, 5))))
 

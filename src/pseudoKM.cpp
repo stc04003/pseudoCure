@@ -9,8 +9,8 @@ using namespace arma;
 // [[Rcpp::plugins(cpp11)]]
 
 // [[Rcpp::export(rng = false)]]
-arma::vec pseudoKM(const arma::vec Time,
-									 const arma::vec censor) {
+arma::vec pseudoKM(arma::vec Time,
+									 arma::vec censor) {
   arma::vec T0 = arma::sort(arma::unique(Time));
   int n = T0.n_elem;
   int N = Time.n_elem;
@@ -51,9 +51,9 @@ arma::vec pseudoKM(const arma::vec Time,
 // The first N elements are the leave i out min KM
 // The last element is the min KM using all data
 // [[Rcpp::export(rng = false)]]
-arma::mat pseudoKM1(const arma::vec Time,
-										const arma::vec censor,
-										const arma::vec Q) {
+arma::mat pseudoKM1(arma::vec Time,
+										arma::vec censor,
+									  arma::vec Q) {
   arma::vec T0 = arma::sort(arma::unique(Time));
   int n = T0.n_elem;
   int N = Time.n_elem;

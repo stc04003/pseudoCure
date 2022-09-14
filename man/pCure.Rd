@@ -13,7 +13,7 @@ pCure(
   subset,
   t0,
   model = c("mixture", "promotion"),
-  nfolds = 10,
+  nfolds = 5,
   lambda1 = NULL,
   exclude1 = NULL,
   penalty1 = c("scad", "lasso"),
@@ -52,7 +52,7 @@ The available functional form are \code{"mixture"} and \code{"promotion"}
 correspond to the mixture cure model and the bounded cumulative model, respectively.}
 
 \item{nfolds}{An optional integer value specifying the number of folds.
-The default value is 10.}
+The default value is 5.}
 
 \item{lambda1, lambda2}{An option for specifying the tuning parameter used in penalization.
 When this is unspecified or has a code{NULL} value,
@@ -63,12 +63,32 @@ Alternatively, this can be specified as a numeric vector of non-negative values.
 \item{exclude1, exclude2}{A character string specifying variables to
 exclude in variable selection.}
 
-\item{control}{A list of control parameters. See detail.}
-
-\item{penality1, penality2}{A character string specifying the penality function.
+\item{penalty1, penalty2}{A character string specifying the penality function.
 The available options are code{"scad"} and code{"lasso"}.}
+
+\item{control}{A list of control parameters. See detail.}
 }
 \description{
 Fits either a mixture cure model or a bounded cumulative hazard (promotion time) model
 with pseudo-observation approach.
+}
+\examples{
+## A melanoma data example
+data(e1684, package = "smcure")
+e1684 <- na.omit(e1684)
+
+## Define formula & fix random seed 
+fn <- ~ AGE + TRT * SEX; set.seed(123)
+
+## Unpenalized PHMC model (~ 0.046s)
+summary(fit1 <- pCure(fn, fn, FAILTIME, FAILCENS, e1684))
+
+## Penalized PHMC model with tuning parameters selected by 10-fold cross validation
+## User specifies the range of tuning parameters
+summary(update(fit1, lambda1 = 1:10 / 200, lambda2 = 1:10 / 200))
+## Auto selection of the range of tuning parameters
+summary(update(fit1, lambda1 = "auto", lambda2 = "auto"))
+
+## Penalized PHMC model given tuning parameters
+summary(update(fit1, lambda1 = 0.006, lambda2 = 0.022))
 }

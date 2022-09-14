@@ -26,7 +26,7 @@ fitPHMC <- function(X1, X2, time, status, t0, control) {
         lambda1.1se <- control$lambda1[which.max(which(cv.mean < cv.1se[which.min(cv.mean)]))]
         fit1 <- pgee(thetai, X1, control$binit1, rep(1, n), control$exclude1,
                      "logit", control$penalty1, "ind",
-                     lambda1.1se, control$eps, control$tol, control$maxit)
+                     lambda1.min, control$eps, control$tol, control$maxit)
         fit1$cv.raw <- cv.raw1
         fit1$lambda1.min <- lambda1.min
         fit1$lambda1.1se <- lambda1.1se
@@ -57,7 +57,7 @@ fitPHMC <- function(X1, X2, time, status, t0, control) {
         lambda2.1se <- control$lambda2[which.max(which(cv.mean < cv.1se[which.min(cv.mean)]))]
         fit2 <- pgee(Fi, X22, control$binit2, nt, control$exclude2,
                      "cloglog", control$penalty2, control$corstr,
-                     lambda2.1se, control$eps, control$tol, control$maxit)
+                     lambda2.min, control$eps, control$tol, control$maxit)
         fit2$cv.raw <- cv.raw2
         fit2$lambda2.min <- lambda2.min
         fit2$lambda2.1se <- lambda2.1se

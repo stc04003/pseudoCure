@@ -42,6 +42,8 @@ summary.pCure <- function(object, cutoff = 1e-3,...) {
   out$tab2 <- out$tab2[-(1:length(object$t0)),]
   out$exclude1 <- abs(out$tab1[,1]) < cutoff1
   out$exclude2 <- abs(out$tab2[,1]) < cutoff2
+  out$lambda1.min <- object$fit1$lambda1.min
+  out$lambda2.min <- object$fit2$lambda2.min
   out$lambda1.1se <- object$fit1$lambda1.1se
   out$lambda2.1se <- object$fit2$lambda2.1se
   class(out) <- "summary.pCure"
@@ -70,14 +72,18 @@ print.summary.pCure <- function(x, ...) {
             cat("\nFitted with the penalized mixture cure rate model")
         if (x$control$model == "promotion")
             cat("\nFitted with the penalized promotion time model")
-  }
-  if (x$control$model == "mixture") cat("\nIncidence component:")
-  else cat("\nLong-term effect:")
-    cat("\nTuning parameters selected by 1se rule: ", x$lambda1.1se, "\n\n")
-  printCoefmat2(x$tab1, exclude = x$exclude1)
-  if (x$control$model == "mixture") cat("\nLatency component:")
-  else cat("\nShort-term effect:")
-    cat("\nTuning parameters selected by 1se rule: ", x$lambda2.1se, "\n\n")
-  printCoefmat2(x$tab2, exclude = x$exclude2)
-  cat("\n")
+    }
+    if (x$control$model == "mixture") cat("\nIncidence component:\n")
+    else cat("\nLong-term effect:\n")
+    if (!is.null(x$lambda1.min))
+        cat("Tuning parameters selected by minimum prediction error:", x$lambda1.min, "\n\n")
+    ## cat("\nTuning parameters selected by 1se rule: ", x$lambda1.1se, "\n\n")
+    printCoefmat2(x$tab1, exclude = x$exclude1)
+    if (x$control$model == "mixture") cat("\nLatency component:\n")
+    else cat("\nShort-term effect:\n")
+    if (!is.null(x$lambda2.min))
+        cat("Tuning parameters selected by minimum prediction error:", x$lambda2.min, "\n\n")
+    ## cat("\nTuning parameters selected by 1se rule: ", x$lambda2.1se, "\n\n")
+    printCoefmat2(x$tab2, exclude = x$exclude2)
+    cat("\n")
 }
