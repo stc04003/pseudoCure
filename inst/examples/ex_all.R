@@ -65,13 +65,7 @@ summary(update(fit1, lambda1 = 0.006, lambda2 = 0.022))
 
 ## All of the above but with PHPH model
 summary(fit2 <- update(fit1, model = 'p')) ## ~7.696s
-summary(update(fit2, lambda1 = 1:10 / 200, lambda2 = 1:10 / 200)) ## ~
+summary(update(fit2, lambda1 = 1:10 / 200, lambda2 = 1:10 / 200)) ## ~5.637s
 summary(update(fit2, lambda1 = "auto", lambda2 = "auto")) ## ~1.790s
-summary(update(fit2, lambda1 = 0.006, lambda2 = 0.022)) ## ~
-
-
-now <- Sys.time()
-summary(update(fit2, lambda1 = 1:10 / 200, lambda2 = 1:10 / 200)) ## ~8.882s
-then <- Sys.time()
-then - now
+summary(update(fit2, lambda1 = 0.006, lambda2 = 0.022)) ## ~0.361s
 
