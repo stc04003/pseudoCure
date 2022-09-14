@@ -73,11 +73,11 @@ print.summary.pCure <- function(x, ...) {
   }
   if (x$control$model == "mixture") cat("\nIncidence component:")
   else cat("\nLong-term effect:")
-    cat("\nTuning parameters selected by 1se rule: ", x$lambda1.1se, "\n")
+    cat("\nTuning parameters selected by 1se rule: ", x$lambda1.1se, "\n\n")
   printCoefmat2(x$tab1, exclude = x$exclude1)
   if (x$control$model == "mixture") cat("\nLatency component:")
   else cat("\nShort-term effect:")
-    cat("\nTuning parameters selected by 1se rule: ", x$lambda2.1se, "\n")
+    cat("\nTuning parameters selected by 1se rule: ", x$lambda2.1se, "\n\n")
   printCoefmat2(x$tab2, exclude = x$exclude2)
   cat("\n")
 }

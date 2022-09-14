@@ -192,45 +192,22 @@ ggplot(subset(e1684.short, t0 %in% t0[2:5 * 2]),
 library(intsurv)
 cox_cure
 
-head(e1684)
 
-lapply(pCure(~ AGE + SEX, time = FAILTIME, status = FAILCENS, data = e1684), head)
-lapply(pCure(~ AGE + SEX, ~ AGE, time = FAILTIME, status = FAILCENS, data = e1684), head)
-lapply(pCure(~ AGE + SEX, ~ AGE - 1, time = FAILTIME, status = FAILCENS, data = e1684), head)
 
-pCure <- function(formula1, formula2, time, status, data, subset,
-                  model = c("mixture", "promotion")) {
-    model <- match.arg(model)
-    if (missing(formula1)) stop("Argument 'formula' is required.")
-    if (missing(time)) stop("Argument 'time' is required.")
-    if (missing(status)) stop("Argument 'status' is required.")
-    if (missing(data)) data <- environment(formula)
-    if (!missing(subset)) {
-        sSubset <- substitute(subset)
-        subIdx <- eval(sSubset, data, parent.frame())
-        if (!is.logical(subIdx)) stop("'subset' must be logical")
-        subIdx <- subIdx & !is.na(subIdx)
-        data <- data[subIdx, ]
-    }
-    mf <- match.call(expand.dots = FALSE)    
-    mf <- mf[match(c("formula1", "data", "time", "status"), names(mf), 0L)]
-    mf$data <- data
-    mf$drop.unused.levels <- TRUE
-    mf[[1L]] <- quote(stats::model.frame)
-    mf <- eval(mf, parent.frame())
-    time <- as.numeric(model.extract(mf, time))
-    status <- as.numeric(model.extract(mf, status))
-    mm1 <- mm2 <- stats::model.matrix(formula1, data = mf)
-    if (!missing(formula2)) {
-        mf <- match.call(expand.dots = FALSE)
-        mf <- mf[match(c("formula2", "data"), names(mf), 0L)]
-        mf$data <- data
-        mf$drop.unused.levels <- TRUE
-        mf[[1L]] <- quote(stats::model.frame)
-        mf <- eval(mf, parent.frame())
-        mm2 <- stats::model.matrix(formula2, data = mf)
-    }
-    list(mm1 = mm1, mm2 = mm2, time = time, status = status)
-}
+sourceCpp(code = '
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+using namespace arma;
+// [[Rcpp::export]]
+arma::vec qscad(arma::vec b, double lambda) {
+  double a = 3.7;
+  arma::vec dif = a * lambda - b;
+  dif.elem(find(dif < 0)).zeros();
+  arma::vec out(b.n_elem, arma::fill::value(lambda));
+  // out.fill(lambda);
+  arma::uvec ind = find(b > lambda);
+  out(ind) = dif(ind) / (a - 1);
+  return(out);
+}')
 
-debug(pCure)
+qscad(1:10, 5)

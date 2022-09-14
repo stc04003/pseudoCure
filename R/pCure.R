@@ -46,12 +46,13 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     model <- match.arg(model)
     penalty1 <- match.arg(penalty1)
     penalty2 <- match.arg(penalty2)
+    ## Checks and define control
     if (missing(formula1)) stop("Argument 'formula' is required.")
     if (missing(time)) stop("Argument 'time' is required.")
     if (missing(status)) stop("Argument 'status' is required.")
-    if (!is.null(lambda1) && any(lambda1 < 0))
+    if (!is.null(lambda1) && !is.character(lambda1) && any(lambda1 < 0))
         stop("Positive tuning parameters ('lambda1') is required.")
-    if (!is.null(lambda2) && any(lambda2 < 0))
+    if (!is.null(lambda2) && !is.character(lambda2) && any(lambda2 < 0))
         stop("Positive tuning parameters ('lambda2') is required.")
     if (missing(data)) data <- environment(formula)
     if (!missing(subset)) {
@@ -61,6 +62,23 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
         subIdx <- subIdx & !is.na(subIdx)
         data <- data[subIdx, ]
     }
+    ctrl <- pCure.control()
+    namc <- names(control)
+    if (!all(namc %in% names(ctrl))) 
+        stop("unknown names in control: ", namc[!(namc %in% names(ctrl))])
+    ctrl[namc] <- control
+    ctrl$model <- model
+    ctrl$lambda1 <- lambda1
+    ctrl$lambda2 <- lambda2
+    ctrl$penalty1 <- penalty1
+    ctrl$penalty2 <- penalty2
+    ctrl$exclude1 <- exclude1
+    ctrl$exclude2 <- exclude2
+    ctrl$nfolds <- nfolds
+    if (is.character(lambda1) && lambda1 != "auto")    
+        stop("Only 'auto' is allowed when 'lambda1' is a character string.")
+    if (is.character(lambda2) && lambda2 != "auto")    
+        stop("Only 'auto' is allowed when 'lambda2' is a character string.")   
     mf <- match.call(expand.dots = FALSE)    
     mf <- mf[match(c("formula1", "data", "time", "status"), names(mf), 0L)]
     mf$data <- data
@@ -84,19 +102,12 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     }
     tmax <- max(time[status > 0])
     if (missing(t0)) t0 <- quantile(time[status > 0], c(1:9 / 10, .95))
-    ctrl <- pCure.control()
-    namc <- names(control)
-    if (!all(namc %in% names(ctrl))) 
-        stop("unknown names in control: ", namc[!(namc %in% names(ctrl))])
-    ctrl[namc] <- control
-    ctrl$model <- model
-    ctrl$lambda1 <- lambda1
-    ctrl$lambda2 <- lambda2
-    ctrl$penalty1 <- penalty1
-    ctrl$penalty2 <- penalty2
-    ctrl$exclude1 <- exclude1
-    ctrl$exclude2 <- exclude2
-    ctrl$nfolds <- nfolds
+    ## auto choose lambda; still under development
+    if (is.character(lambda1) || is.character(lambda2))
+        tmp <- auto.lambda(mm1, mm2, time, status, t0, ctrl)
+    if (is.character(lambda1) && lambda1 == "auto") ctrl$lambda1 <- tmp$lambda1
+    if (is.character(lambda2) && lambda2 == "auto") ctrl$lambda2 <- tmp$lambda2
+    ## Fit models
     if (model == "mixture")
         out <- fitPHMC(mm1, mm2, time, status, t0, ctrl)
     if (model == "promotion")
@@ -122,6 +133,8 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
 #' @param corstr A character string specifying the correlation structure.
 #' The following are permitted: \code{"independence"}, \code{"exchangeable"},
 #' and \code{"ar1"}.
+#' @param nlambda1,nlambda2 An integer value specifying the number of lambda.
+#' This is only evoked when \code{lambda1 = "auto"} or \code{lambda2 = "auto"}.
 #' @param eps A positive numerical value used to ...
 #' @param tol A positive numerical value specifying the absolute error tolerance in GEE algorithms.
 #' @param maxit An integer value specifying the maximum number of iteration.
@@ -130,8 +143,33 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
 #' @export
 pCure.control <- function(binit1 = NULL, binit2 = NULL,
                           corstr = c("independence", "exchangeable", "ar1"),
+                          nlambda1 = 100, nlambda2 = 100,
                           eps = 1e-6, tol = 1e-7, maxit = 100) {
     corstr <- match.arg(corstr)
     list(binit1 = binit1, binit2 = binit2, corstr = corstr,
+         nlambda1 = 100, nlambda2 = 100,
          eps = eps, tol = tol, maxit = maxit)
+}
+
+
+#' Auto select lambda to apply CV
+#'
+#' Still under development
+#' 
+#' @noRd
+auto.lambda <- function(mm1, mm2, time, status, t0, ctrl) {
+    trys <- exp(-5:10)
+    lambda1.max <- lambda2.max <- max(trys)
+    for (i in 1:length(trys)) {
+        ctrl$lambda1 <- ctrl$lambda2 <- trys[i]
+        if (ctrl$model == "mixture")
+            tmp <- fitPHMC(mm1, mm2, time, status, t0, ctrl)
+        if (ctrl$model == "promotion")
+            tmp <- fitPHPH(mm1, mm2, time, status, t0, ctrl)
+        if (all(abs(tmp$fit1$b) < 1e-6)) lambda1.max <- trys[i]
+        if (all(abs(tmp$fit2$b) < 1e-6)) lambda2.max <- trys[i]
+        if (max(lambda1.max, lambda2.max) < max(trys)) break
+    }
+    list(lambda1 = exp(seq(log(1e-04), lambda1.max, length.out = ctrl$nlambda1)),
+         lambda2 = exp(seq(log(1e-04), lambda2.max, length.out = ctrl$nlambda2)))
 }
