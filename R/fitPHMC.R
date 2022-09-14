@@ -1,6 +1,4 @@
-fitPHMC <- function(X1, X2, time, status, t0,
-                    lambda1, penalty1, exclude1, lambda2, penalty2, exclude2, 
-                    control) {
+fitPHMC <- function(X1, X2, time, status, t0, control) {
     tmax <- max(time[status > 0])
     KMs <- pseudoKM1(time, status, c(t0, tmax))
     n <- length(time)
@@ -10,11 +8,12 @@ fitPHMC <- function(X1, X2, time, status, t0,
     curei <- KMs[length(t0) + 1, 1:n]
     thetai <- n * (1 - cure) - (n - 1) * (1 - curei)
     if (is.null(control$binit1)) control$binit1 <- rep(0, ncol(X1))
-    if (is.null(lambda1))
+    if (is.null(control$exclude1)) control$exclude1 <- rep(0, ncol(X1))
+    if (is.null(control$lambda1))
         fit1 <- gee(thetai, X1, control$binit1, rep(1, n), "logit", "ind", control$tol, control$maxit)
     else
-        fit1 <- pgee(thetai, X1, control$binit1, rep(1, n), exclude1,
-                     "logit", penalty1, "ind", lambda1, control$eps, control$tol, control$maxit)
+        fit1 <- pgee(thetai, X1, control$binit1, rep(1, n), control$exclude1,
+                     "logit", control$penalty1, "ind", control$lambda1, control$eps, control$tol, control$maxit)
     Si <- n * (S - cure) / (1 - cure) - c((n - 1) * t((t(Si) - curei) / (1 - curei)))
     Fi <- 1 - Si
     nt <- rep(length(t0), length(time))
@@ -22,12 +21,13 @@ fitPHMC <- function(X1, X2, time, status, t0,
                  X2[rep(1:nrow(X2), each = length(t0)),])
     colnames(X22) <- c(paste("t", seq_along(t0), sep = ""), colnames(X2))
     if (is.null(control$binit2)) control$binit2 <- rep(0, ncol(X22))
-    if (is.null(lambda2))
+    if (is.null(control$exclude2)) control$exclude2 <- rep(0, ncol(X22))
+    if (is.null(control$lambda2))
         fit2 <- gee(Fi, X22, control$binit2, nt, "cloglog",
                     control$corstr, control$tol, control$maxit)
     else
-        fit2 <- pgee(Fi, X22, control$binit2, nt, exclude2, "cloglog",
-                     penalty2, control$corstr, lambda2, control$eps, control$tol, control$maxit)
+        fit2 <- pgee(Fi, X22, control$binit2, nt, control$exclude2, "cloglog",
+                     control$penalty2, control$corstr, control$lambda2, control$eps, control$tol, control$maxit)
     fit1$b <- drop(fit1$b)
     fit2$b <- drop(fit2$b)
     names(fit1$b) <- colnames(X1)

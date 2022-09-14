@@ -29,7 +29,8 @@
 #' Alternatively, this can be specified as a numeric vector of non-negative values.
 #' @param penality1,penality2 A character string specifying the penality function.
 #' The available options are code{"scad"} and code{"lasso"}.
-#' @param exclude1,exclude2 A character string specifying 
+#' @param exclude1,exclude2 A character string specifying variables to
+#' exclude in variable selection.
 #' @param control A list of control parameters. See detail.
 #'
 #' @importFrom stats model.frame model.matrix
@@ -37,9 +38,8 @@
 #' @export
 pCure <- function(formula1, formula2, time, status, data, subset, t0, 
                   model = c("mixture", "promotion"),
-                  lambda1 = NULL, lambda2 = NULL,
-                  penalty1 = c("scad", "lasso"), penalty2 = c("scad", "lasso"),
-                  exclude1 = NULL, exclude2 = NULL, 
+                  lambda1 = NULL, exclude1 = NULL, penalty1 = c("scad", "lasso"), 
+                  lambda2 = NULL, exclude2 = NULL, penalty2 = c("scad", "lasso"),
                   control = list()) {
     model <- match.arg(model)
     penalty1 <- match.arg(penalty1)
@@ -83,18 +83,24 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     if (!all(namc %in% names(ctrl))) 
         stop("unknown names in control: ", namc[!(namc %in% names(ctrl))])
     ctrl[namc] <- control
+    ctrl$model <- model
+    ctrl$lambda1 <- lambda1
+    ctrl$lambda2 <- lambda2
+    ctrl$penalty1 <- penalty1
+    ctrl$penalty2 <- penalty2
+    ctrl$exclude1 <- exclude1
+    ctrl$exclude2 <- exclude2
     if (model == "mixture")
-        out <- fitPHMC(mm1, mm2, time, status, t0,
-                       lambda1, penalty1, exclude1, lambda2, penalty2, exclude2, ctrl)
+        out <- fitPHMC(mm1, mm2, time, status, t0, ctrl)
     if (model == "promotion")
-        out <- fitPHPH(mm1, mm2, time, status, t0,
-                       lambda1, penalty1, exclude1, lambda2, penalty2, exclude2, ctrl)
+        out <- fitPHPH(mm1, mm2, time, status, t0, ctrl)
     out$t0 <- t0
     out$call <- match.call()
     out$xlevel1 <- xlevel1
     out$xlevel2 <- xlevel2
-    class(out) <- "pCure"
+    out$control <- ctrl
     out <- out[order(names(out))]
+    class(out) <- "pCure"
     return(out)
 }
 

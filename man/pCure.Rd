@@ -13,6 +13,12 @@ pCure(
   subset,
   t0,
   model = c("mixture", "promotion"),
+  lambda1 = NULL,
+  exclude1 = NULL,
+  penalty1 = c("scad", "lasso"),
+  lambda2 = NULL,
+  exclude2 = NULL,
+  penalty2 = c("scad", "lasso"),
   control = list()
 )
 }
@@ -44,7 +50,19 @@ uncensored event times.}
 The available functional form are \code{"mixture"} and \code{"promotion"}
 correspond to the mixture cure model and the bounded cumulative model, respectively.}
 
+\item{lambda1, lambda2}{An option for specifying the tuning parameter used in penalization.
+When this is unspecified or has a code{NULL} value,
+penalization will not be applied and the \code{pCure} fit will uses all covariates
+specified in the formulas.
+Alternatively, this can be specified as a numeric vector of non-negative values.}
+
+\item{exclude1, exclude2}{A character string specifying variables to
+exclude in variable selection.}
+
 \item{control}{A list of control parameters. See detail.}
+
+\item{penality1, penality2}{A character string specifying the penality function.
+The available options are code{"scad"} and code{"lasso"}.}
 }
 \description{
 Fits either a mixture cure model or a bounded cumulative hazard (promotion time) model
