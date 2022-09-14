@@ -60,8 +60,8 @@ fitPHPH <- function(X1, X2, time, status, t0, control) {
                      "cloglog", control$penalty2, control$corstr,
                      lambda2.1se, control$eps, control$tol, control$maxit)
         fit2$cv.raw <- cv.raw2
-        fit2$lambda1.min <- lambda2.min
-        fit2$lambda1.1se <- lambda2.1se        
+        fit2$lambda2.min <- lambda2.min
+        fit2$lambda2.1se <- lambda2.1se        
     }
     fit1$b <- drop(fit1$b)
     fit2$b <- drop(fit2$b)

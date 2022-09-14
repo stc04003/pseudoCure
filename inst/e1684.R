@@ -230,6 +230,11 @@ summary(foo4)
                lambda1 = 1:10 / 100, lambda2 = 1:10 / 100))
 summary(foo5)
 
+
+(foo6 <- pCure(~ AGE + TRT * SEX, ~ AGE + TRT * SEX, FAILTIME, FAILCENS, e1684, model = 'p',
+               lambda1 = 1:10 / 100, lambda2 = 1:10 / 100))
+summary(foo6)
+
 pseudoCure:::pgeeCV
 
 library(glmnet)
