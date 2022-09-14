@@ -283,18 +283,18 @@ arma::vec getID(arma::vec nt) {
 }
 
 // [[Rcpp::export]]
-arma::mat geeCV(arma::vec y,
-		arma::mat X,
-		arma::vec b0,
-		arma::vec nt,
-		arma::vec pindex, // 0 means to penalize
-		std::string glmlink,
-		std::string penalty,
-		std::string corstr,
-		int nCV, 
-		arma::vec lambda,
-		double eps,
-		double tol, int maxit){
+arma::mat pgeeCV(arma::vec y,
+								 arma::mat X,
+								 arma::vec b0,
+								 arma::vec nt,
+								 arma::vec pindex, // 0 means to penalize
+								 std::string glmlink,
+								 std::string penalty,
+								 std::string corstr,
+								 int nCV, 
+								 arma::vec lambda,
+								 double eps,
+								 double tol, int maxit){
   arma::mat out(nCV, lambda.n_elem, arma::fill::zeros);
   arma::vec cvm(nCV, arma::fill::zeros);
   arma::vec id = getID(nt);
@@ -315,7 +315,7 @@ arma::mat geeCV(arma::vec y,
     arma::vec ntTrain = nt(span(1, idCV.n_elem));
     for (int j = 0; j < (int) lambda.n_elem; j++) {			
       Rcpp::List tmp = pgee(yTrain, XTrain, b0, ntTrain, pindex, glmlink, penalty, "ind",
-			    lambda(j), eps, tol, maxit);
+														lambda(j), eps, tol, maxit);
       arma::vec b1 = tmp(0);
       arma::vec eta = XTest * b1;
       Rcpp::List links;

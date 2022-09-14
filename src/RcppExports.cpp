@@ -49,9 +49,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// geeCV
-arma::mat geeCV(arma::vec y, arma::mat X, arma::vec b0, arma::vec nt, arma::vec pindex, std::string glmlink, std::string penalty, std::string corstr, int nCV, arma::vec lambda, double eps, double tol, int maxit);
-RcppExport SEXP _pseudoCure_geeCV(SEXP ySEXP, SEXP XSEXP, SEXP b0SEXP, SEXP ntSEXP, SEXP pindexSEXP, SEXP glmlinkSEXP, SEXP penaltySEXP, SEXP corstrSEXP, SEXP nCVSEXP, SEXP lambdaSEXP, SEXP epsSEXP, SEXP tolSEXP, SEXP maxitSEXP) {
+// pgeeCV
+arma::mat pgeeCV(arma::vec y, arma::mat X, arma::vec b0, arma::vec nt, arma::vec pindex, std::string glmlink, std::string penalty, std::string corstr, int nCV, arma::vec lambda, double eps, double tol, int maxit);
+RcppExport SEXP _pseudoCure_pgeeCV(SEXP ySEXP, SEXP XSEXP, SEXP b0SEXP, SEXP ntSEXP, SEXP pindexSEXP, SEXP glmlinkSEXP, SEXP penaltySEXP, SEXP corstrSEXP, SEXP nCVSEXP, SEXP lambdaSEXP, SEXP epsSEXP, SEXP tolSEXP, SEXP maxitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -68,7 +68,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< int >::type maxit(maxitSEXP);
-    rcpp_result_gen = Rcpp::wrap(geeCV(y, X, b0, nt, pindex, glmlink, penalty, corstr, nCV, lambda, eps, tol, maxit));
+    rcpp_result_gen = Rcpp::wrap(pgeeCV(y, X, b0, nt, pindex, glmlink, penalty, corstr, nCV, lambda, eps, tol, maxit));
     return rcpp_result_gen;
 END_RCPP
 }

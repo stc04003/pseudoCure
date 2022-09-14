@@ -9,8 +9,8 @@ gee <- function(y, X, b0, nt, glmlink, corstr, tol, maxit) {
     .Call('_pseudoCure_gee', PACKAGE = 'pseudoCure', y, X, b0, nt, glmlink, corstr, tol, maxit)
 }
 
-geeCV <- function(y, X, b0, nt, pindex, glmlink, penalty, corstr, nCV, lambda, eps, tol, maxit) {
-    .Call('_pseudoCure_geeCV', PACKAGE = 'pseudoCure', y, X, b0, nt, pindex, glmlink, penalty, corstr, nCV, lambda, eps, tol, maxit)
+pgeeCV <- function(y, X, b0, nt, pindex, glmlink, penalty, corstr, nCV, lambda, eps, tol, maxit) {
+    .Call('_pseudoCure_pgeeCV', PACKAGE = 'pseudoCure', y, X, b0, nt, pindex, glmlink, penalty, corstr, nCV, lambda, eps, tol, maxit)
 }
 
 pseudoKM <- function(Time, censor) {

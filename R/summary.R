@@ -9,14 +9,14 @@ print.pCure <- function(x, cutoff = 1e-3, ...) {
   dput(x$call)
   if (all(is.null(x$control$lambda1), is.null(x$control$lambda2))) {
     if (x$control$model == "mixture")
-      cat("\nFitted with the mixture cure rate model:")
+      cat("\nFitted with the mixture cure rate model")
     if (x$control$model == "promotion")
-      cat("\nFitted with the promotion time model:")
+      cat("\nFitted with the promotion time model")
   } else {
     if (x$control$model == "mixture")
-      cat("\nFitted with the penalized mixture cure rate model:")
+      cat("\nFitted with the penalized mixture cure rate model")
     if (x$control$model == "promotion")
-      cat("\nFitted with the penalized promotion time model:")
+      cat("\nFitted with the penalized promotion time model")
   }
   mat1 <- t(format(x$fit1$b, digits = 5))
   mat2 <- t(format(x$fit2$b[-(1:length(x$t0))], digits = 5))
@@ -41,7 +41,9 @@ summary.pCure <- function(object, cutoff = 1e-3,...) {
   out$tab2 <- pvalTab(object$fit2$b, sqrt(diag(object$fit2$vb)))
   out$tab2 <- out$tab2[-(1:length(object$t0)),]
   out$exclude1 <- abs(out$tab1[,1]) < cutoff1
-  out$exclude2 <- abs(out$tab2[,1]) < cutoff2 
+  out$exclude2 <- abs(out$tab2[,1]) < cutoff2
+  out$lambda1.1se <- object$fit1$lambda1.1se
+  out$lambda2.1se <- object$fit2$lambda2.1se
   class(out) <- "summary.pCure"
   return(out)
 }
@@ -56,25 +58,26 @@ pvalTab <- function(pe, se, names = NULL) {
 
 #' @exportS3Method print summary.pCure
 print.summary.pCure <- function(x, ...) {
-  cat("Call: \n")
-  dput(x$call)
-  if (all(is.null(x$control$lambda1), is.null(x$control$lambda2))) {
-    if (x$control$model == "mixture")
-      cat("\nFitted with the mixture cure rate model:")
-    if (x$control$model == "promotion")
-      cat("\nFitted with the promotion time model:")
-  } else {
-    if (x$control$model == "mixture")
-      cat("\nFitted with the penalized mixture cure rate model:")
-    if (x$control$model == "promotion")
-      cat("\nFitted with the penalized promotion time model:")
+    cat("Call: \n")
+    dput(x$call)
+    if (all(is.null(x$control$lambda1), is.null(x$control$lambda2))) {
+        if (x$control$model == "mixture")
+            cat("\nFitted with the mixture cure rate model")
+        if (x$control$model == "promotion")
+            cat("\nFitted with the promotion time model")
+    } else {
+        if (x$control$model == "mixture")
+            cat("\nFitted with the penalized mixture cure rate model")
+        if (x$control$model == "promotion")
+            cat("\nFitted with the penalized promotion time model")
   }
-
-  if (x$control$model == "mixture") cat("\nIncidence component:\n")
-  else cat("\nLong-term effect:\n")
+  if (x$control$model == "mixture") cat("\nIncidence component:")
+  else cat("\nLong-term effect:")
+    cat("\nTuning parameters selected by 1se rule: ", x$lambda1.1se, "\n")
   printCoefmat2(x$tab1, exclude = x$exclude1)
-  if (x$control$model == "mixture") cat("\nLatency component:\n")
-  else cat("\nShort-term effect:\n")
+  if (x$control$model == "mixture") cat("\nLatency component:")
+  else cat("\nShort-term effect:")
+    cat("\nTuning parameters selected by 1se rule: ", x$lambda2.1se, "\n")
   printCoefmat2(x$tab2, exclude = x$exclude2)
   cat("\n")
 }

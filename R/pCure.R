@@ -31,13 +31,15 @@
 #' The available options are code{"scad"} and code{"lasso"}.
 #' @param exclude1,exclude2 A character string specifying variables to
 #' exclude in variable selection.
+#' @param nfolds An optional integer value specifying the number of folds.
+#' The default value is 10. 
 #' @param control A list of control parameters. See detail.
 #'
 #' @importFrom stats model.frame model.matrix
 #'
 #' @export
 pCure <- function(formula1, formula2, time, status, data, subset, t0, 
-                  model = c("mixture", "promotion"),
+                  model = c("mixture", "promotion"), nfolds = 10,
                   lambda1 = NULL, exclude1 = NULL, penalty1 = c("scad", "lasso"), 
                   lambda2 = NULL, exclude2 = NULL, penalty2 = c("scad", "lasso"),
                   control = list()) {
@@ -47,6 +49,10 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     if (missing(formula1)) stop("Argument 'formula' is required.")
     if (missing(time)) stop("Argument 'time' is required.")
     if (missing(status)) stop("Argument 'status' is required.")
+    if (!is.null(lambda1) && any(lambda1 < 0))
+        stop("Positive tuning parameters ('lambda1') is required.")
+    if (!is.null(lambda2) && any(lambda2 < 0))
+        stop("Positive tuning parameters ('lambda2') is required.")
     if (missing(data)) data <- environment(formula)
     if (!missing(subset)) {
         sSubset <- substitute(subset)
@@ -90,6 +96,7 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     ctrl$penalty2 <- penalty2
     ctrl$exclude1 <- exclude1
     ctrl$exclude2 <- exclude2
+    ctrl$nfolds <- nfolds
     if (model == "mixture")
         out <- fitPHMC(mm1, mm2, time, status, t0, ctrl)
     if (model == "promotion")
@@ -103,7 +110,6 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     class(out) <- "pCure"
     return(out)
 }
-
 
 #' Pakcage options for pseudoCure
 #'

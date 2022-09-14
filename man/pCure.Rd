@@ -13,6 +13,7 @@ pCure(
   subset,
   t0,
   model = c("mixture", "promotion"),
+  nfolds = 10,
   lambda1 = NULL,
   exclude1 = NULL,
   penalty1 = c("scad", "lasso"),
@@ -49,6 +50,9 @@ uncensored event times.}
 \item{model}{A character string specifying the underlying model.
 The available functional form are \code{"mixture"} and \code{"promotion"}
 correspond to the mixture cure model and the bounded cumulative model, respectively.}
+
+\item{nfolds}{An optional integer value specifying the number of folds.
+The default value is 10.}
 
 \item{lambda1, lambda2}{An option for specifying the tuning parameter used in penalization.
 When this is unspecified or has a code{NULL} value,
