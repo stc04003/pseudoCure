@@ -10,7 +10,7 @@ using namespace arma;
 
 // [[Rcpp::export(rng = false)]]
 arma::vec pseudoKM(arma::vec Time,
-									 arma::vec censor) {
+		   arma::vec censor) {
   arma::vec T0 = arma::sort(arma::unique(Time));
   int n = T0.n_elem;
   int N = Time.n_elem;
@@ -52,42 +52,42 @@ arma::vec pseudoKM(arma::vec Time,
 // The last element is the min KM using all data
 // [[Rcpp::export(rng = false)]]
 arma::mat pseudoKM1(arma::vec Time,
-										arma::vec censor,
-									  arma::vec Q) {
+		    arma::vec censor,
+		    arma::vec Q) {
   arma::vec T0 = arma::sort(arma::unique(Time));
   int n = T0.n_elem;
   int N = Time.n_elem;
   arma::vec d(n, arma::fill::zeros);
   arma::vec r(n, arma::fill::zeros);
-	arma::mat out(Q.n_elem, N + 1, arma::fill::ones);
+  arma::mat out(Q.n_elem, N + 1, arma::fill::ones);
   // calculate d and r for all data
   for (int i = 0; i < n; i++) {
     arma::uvec ind1 = find(Time == T0[i]);
     d[i] = sum(censor.elem(ind1));
     r(span(0, i)) += ind1.n_elem;
   }
-	// Identify quantiles; like findInterval()
-	arma::uvec ind1(Q.n_elem, arma::fill::ones);;
-	for (int i = 0; i < (int) Q.n_elem; i++) {
-		arma::uvec tmp = find(Q(i) >= T0, 1, "last");
-		ind1(i) = tmp(0);
-	}
-	for (int i = 0; i < N; i++) {
-		arma::vec d2 = d;
-		arma::vec r2 = r;
-    arma::uvec ind = find(Time[i] == T0, 1);
-		int tmp = (int) ind(0);
-		if (censor[i] > 0) d2(tmp) -= 1;
-		r2(span(0, tmp)) -= 1; 
-		arma::vec dr = d2 / r2;
-		dr.replace(arma::datum::nan, 0);
-    dr.replace(arma::datum::inf, 0);
-		arma::vec S = cumprod(1 - dr);
-		for (int j = 0; j < (int) Q.n_elem; j++) {
-			out(j, i) = S(ind1(j));
-		}
+  // Identify quantiles; like findInterval()
+  arma::uvec ind1(Q.n_elem, arma::fill::ones);;
+  for (int i = 0; i < (int) Q.n_elem; i++) {
+    arma::uvec tmp = find(Q(i) >= T0, 1, "last");
+    ind1(i) = tmp(0);
   }
-	arma::vec S = cumprod(1 - d / r); 
+  for (int i = 0; i < N; i++) {
+    arma::vec d2 = d;
+    arma::vec r2 = r;
+    arma::uvec ind = find(Time[i] == T0, 1);
+    int tmp = (int) ind(0);
+    if (censor[i] > 0) d2(tmp) -= 1;
+    r2(span(0, tmp)) -= 1; 
+    arma::vec dr = d2 / r2;
+    dr.replace(arma::datum::nan, 0);
+    dr.replace(arma::datum::inf, 0);
+    arma::vec S = cumprod(1 - dr);
+    for (int j = 0; j < (int) Q.n_elem; j++) {
+      out(j, i) = S(ind1(j));
+    }
+  }
+  arma::vec S = cumprod(1 - d / r); 
   out.col(N) = S(ind1);
   return(out);
 }
