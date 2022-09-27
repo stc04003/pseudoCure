@@ -49,14 +49,18 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     penalty1 <- match.arg(penalty1)
     penalty2 <- match.arg(penalty2)
     ## Checks and define control
-    if (missing(formula1)) stop("Argument 'formula' is required.")
+    if (is.null.missing(formula1) & is.null.missing(formula2))
+      stop("At least one 'formula' need to be specified.")
     if (missing(time)) stop("Argument 'time' is required.")
     if (missing(status)) stop("Argument 'status' is required.")
     if (!is.null(lambda1) && !is.character(lambda1) && any(lambda1 < 0))
         stop("Positive tuning parameters ('lambda1') is required.")
     if (!is.null(lambda2) && !is.character(lambda2) && any(lambda2 < 0))
         stop("Positive tuning parameters ('lambda2') is required.")
-    if (missing(data)) data <- environment(formula)
+    if (missing(data)) {
+      if (is.null.missing(formula1)) data <- environment(formula1)
+      else data <- environment(formula2)
+    }
     if (!missing(subset)) {
         sSubset <- substitute(subset)
         subIdx <- eval(sSubset, data, parent.frame())
@@ -80,9 +84,12 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     if (is.character(lambda1) && lambda1 != "auto")    
         stop("Only 'auto' is allowed when 'lambda1' is a character string.")
     if (is.character(lambda2) && lambda2 != "auto")    
-        stop("Only 'auto' is allowed when 'lambda2' is a character string.")   
-    mf <- match.call(expand.dots = FALSE)    
-    mf <- mf[match(c("formula1", "data", "time", "status"), names(mf), 0L)]
+      stop("Only 'auto' is allowed when 'lambda2' is a character string.")
+    mf <- match.call(expand.dots = FALSE)
+    if (is.null.missing(formula1)) 
+      mf <- mf[match(c("formula2", "data", "time", "status"), names(mf), 0L)]
+    else
+      mf <- mf[match(c("formula1", "data", "time", "status"), names(mf), 0L)]
     mf$data <- data
     mf$drop.unused.levels <- TRUE
     mf[[1L]] <- quote(stats::model.frame)
@@ -90,18 +97,25 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     xlevel1 <- xlevel2 <- .getXlevels(attr(mf, "terms"), mf)
     time <- as.numeric(model.extract(mf, time))
     status <- as.numeric(model.extract(mf, status))
-    mm1 <- mm2 <- stats::model.matrix(formula1, data = mf)
-    if (!missing(formula2)) {
-        mf <- match.call(expand.dots = FALSE)
-        mf <- mf[match(c("formula2", "data"), names(mf), 0L)]
-        mf$data <- data
-        mf$drop.unused.levels <- TRUE
-        mf[[1L]] <- quote(stats::model.frame)
-        mf <- eval(mf, parent.frame())
-        xlevel2 <- .getXlevels(attr(mf, "terms"), mf)
-        mm2 <- stats::model.matrix(formula2, data = mf)
-        mm2 <- mm2[, colnames(mm2) != "(Intercept)"]   
+    if (is.null.missing(formula1)) {   
+      mm1 <- NULL
+      mm2 <- stats::model.matrix(formula2, data = mf)
+      mm2 <- mm2[, colnames(mm2) != "(Intercept)"]   
+    } else {
+      mm1 <- mm2 <- stats::model.matrix(formula1, data = mf)
+      if (is.null.missing(formula2)) mm2 <- NULL
     }
+    if (!is.null.missing(formula1) && !is.null.missing(formula2)) {
+      mf <- match.call(expand.dots = FALSE)
+      mf <- mf[match(c("formula2", "data"), names(mf), 0L)]
+      mf$data <- data
+      mf$drop.unused.levels <- TRUE
+      mf[[1L]] <- quote(stats::model.frame)
+      mf <- eval(mf, parent.frame())
+      xlevel2 <- .getXlevels(attr(mf, "terms"), mf)
+      mm2 <- stats::model.matrix(formula2, data = mf)
+      mm2 <- mm2[, colnames(mm2) != "(Intercept)"]   
+    }    
     tmax <- max(time[status > 0])
     if (missing(t0)) t0 <- quantile(time[status > 0], c(1:9 / 10, .95))
     ## auto choose lambda; still under development
@@ -175,3 +189,5 @@ auto.lambda <- function(mm1, mm2, time, status, t0, ctrl) {
     list(lambda1 = exp(seq(log(1e-04), log(lambda1.max), length.out = ctrl$nlambda1)),
          lambda2 = exp(seq(log(1e-04), log(lambda2.max), length.out = ctrl$nlambda2)))
 }
+
+is.null.missing <- function(x) missing(x) || is.null(x)
