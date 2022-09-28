@@ -81,6 +81,10 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     ctrl$exclude1 <- exclude1
     ctrl$exclude2 <- exclude2
     ctrl$nfolds <- nfolds
+    if (is.null.missing(formula1)) ctrl$formula1 <- NULL
+    else ctrl$formula1 <- formula1
+    if (is.null.missing(formula2)) ctrl$formula2 <- NULL
+    else ctrl$formula2 <- formula2
     if (is.character(lambda1) && lambda1 != "auto")    
         stop("Only 'auto' is allowed when 'lambda1' is a character string.")
     if (is.character(lambda2) && lambda2 != "auto")    

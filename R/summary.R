@@ -87,3 +87,36 @@ print.summary.pCure <- function(x, ...) {
     printCoefmat2(x$tab2, exclude = x$exclude2)
     cat("\n")
 }
+
+
+#' @exportS3Method coef pCure
+coef.pCure <- function(object, part = "both", ...) {
+    out <- list(object$fit1$b, object$fit2$b)
+    if (object$control$model == "mixture") {
+        part <- match.arg(part, c("both", "incidence", "latency"))
+        names(out) <- c("incidence", "latency")
+    }
+    if (object$control$model == "promotion") {
+        part <- match.arg(part, c("both", "long", "short"))
+        names(out) <- c("long", "short")
+    }
+    if (part == "both") return(out)
+    else return(out[[part]])
+}
+
+#' @exportS3Method vcov pCure
+vcov.pCure <- function(object, part = "both", ...) {
+    out <- list(object$fit1$vb, object$fit2$vb)
+    colnames(out[[1]]) <- rownames(out[[1]]) <- names(object$fit1$b)
+    colnames(out[[2]]) <- rownames(out[[2]]) <- names(object$fit2$b)
+    if (object$control$model == "mixture") {
+        part <- match.arg(part, c("both", "incidence", "latency"))
+        names(out) <- c("incidence", "latency")
+    }
+    if (object$control$model == "promotion") {
+        part <- match.arg(part, c("both", "long", "short"))
+        names(out) <- c("long", "short")
+    }
+    if (part == "both") return(out)
+    else return(out[[part]])
+}
