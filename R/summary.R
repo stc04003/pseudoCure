@@ -120,3 +120,19 @@ vcov.pCure <- function(object, part = "both", ...) {
     if (part == "both") return(out)
     else return(out[[part]])
 }
+
+
+#' @exportS3Method residuals pCure
+residuals.pCure <- function(object, part = "both", ...) {
+    out <- list(object$fit1$resid, object$fit2$resid)
+    if (object$control$model == "mixture") {
+        part <- match.arg(part, c("both", "incidence", "latency"))
+        names(out) <- c("incidence", "latency")
+    }
+    if (object$control$model == "promotion") {
+        part <- match.arg(part, c("both", "long", "short"))
+        names(out) <- c("long", "short")
+    }
+    if (part == "both") return(out)
+    else return(out[[part]])
+}

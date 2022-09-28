@@ -7,12 +7,12 @@ fitPHMC <- function(X1, X2, time, status, t0, control) {
     Si <- KMs[1:length(t0), 1:n]
     cure <- KMs[length(t0) + 1, n + 1]
     curei <- KMs[length(t0) + 1, 1:n]
-    fit1 <- fitPHMC1(X1, X2, time, status, control, cure, curei)
-    fit2 <- fitPHMC2(X1, X2, time, status, t0, control, cure, curei, S, Si)
+    fit1 <- fitPHMC1(X1, time, status, control, cure, curei)
+    fit2 <- fitPHMC2(X2, time, status, t0, control, cure, curei, S, Si)
     list(fit1 = fit1, fit2 = fit2)
 }
 
-fitPHMC1 <- function(X1, X2, time, status, control,
+fitPHMC1 <- function(X1, time, status, control,
                      cure = NULL, curei = NULL) {
   n <- length(time)
   if (any(is.null(cure), is.null(curei))) {
@@ -48,10 +48,11 @@ fitPHMC1 <- function(X1, X2, time, status, control,
   fit1$b <- drop(fit1$b)
   names(fit1$b) <- colnames(X1)
   fit1$vb <- with(fit1, ginv(H + n * E) %*% M %*% ginv(H + n * E))
+  fit1$resid <- drop(thetai - 1 / (exp(-X1 %*% fit1$b) + 1))
   return(fit1)  
 }
 
-fitPHMC2 <- function(X1, X2, time, status, t0, control,
+fitPHMC2 <- function(X2, time, status, t0, control,
                      cure = NULL, curei = NULL, S = NULL, Si = NULL) {
   n <- length(time)
   tmax <- max(time[status > 0])
@@ -96,5 +97,6 @@ fitPHMC2 <- function(X1, X2, time, status, t0, control,
   fit2$b <- drop(fit2$b)
   names(fit2$b) <- colnames(X22)
   fit2$vb <- with(fit2, ginv(H + n * E) %*% M %*% ginv(H + n * E))
+  fit2$resid <- drop(SSi - exp(-exp(X22 %*% fit2$b)))
   return(fit2)  
 }

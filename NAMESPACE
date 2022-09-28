@@ -3,6 +3,7 @@
 S3method(coef,pCure)
 S3method(print,pCure)
 S3method(print,summary.pCure)
+S3method(residuals,pCure)
 S3method(summary,pCure)
 S3method(vcov,pCure)
 export(pCure)
