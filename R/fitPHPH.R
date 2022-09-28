@@ -7,8 +7,9 @@ fitPHPH <- function(X1, X2, time, status, t0, control) {
     Si <- KMs[1:length(t0), 1:n]
     cure <- KMs[length(t0) + 1, n + 1]
     curei <- KMs[length(t0) + 1, 1:n]
-    fit1 <- fitPHPH1(X1, time, status, control, cure, curei)
-    fit2 <- fitPHPH2(X2, time, status, t0, control, cure, curei, S, Si)    
+    fit1 <- fit2 <- NULL
+    if (!is.null(X1)) fit1 <- fitPHPH1(X1, time, status, control, cure, curei)
+    if (!is.null(X2)) fit2 <- fitPHPH2(X2, time, status, t0, control, cure, curei, S, Si)    
     list(fit1 = fit1, fit2 = fit2)
 }
 

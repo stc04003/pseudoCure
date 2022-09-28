@@ -151,3 +151,24 @@ fitted.pCure <- function(object, part = "both", ...) {
     if (part == "both") return(out)
     else return(out[[part]])
 }
+
+
+#' @importFrom ggplot2 ggplot geom_point xlab ylab aes
+#'
+#' @exportS3Method plot pCure
+plot.pCure <- function(object, part = "both", ...) {
+    dat <- data.frame(fitted = unlist(fitted(object)),
+                      resid = unlist(resid(object)))
+    tmp <- lapply(fitted(object), length)
+    dat$Component <- rep(names(tmp), unlist(tmp))
+    if (object$control$model == "mixture") 
+        part <- match.arg(part, c("both", "incidence", "latency"))
+    if (object$control$model == "promotion") 
+        part <- match.arg(part, c("both", "long", "short"))
+    if (part != "both") dat <- subset(dat, Component == part)
+    if (length(unique(dat$Component)) == 1)
+        p <- ggplot(dat, aes(x = fitted,y = resid))
+    else 
+        p <- ggplot(dat, aes(x = fitted,y = resid, color = Component))
+    p + geom_point() + xlab("Fitted values") + ylab("Residuals")
+}
