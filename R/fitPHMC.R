@@ -48,7 +48,8 @@ fitPHMC1 <- function(X1, time, status, control,
   fit1$b <- drop(fit1$b)
   names(fit1$b) <- colnames(X1)
   fit1$vb <- with(fit1, ginv(H + n * E) %*% M %*% ginv(H + n * E))
-  fit1$resid <- drop(thetai - 1 / (exp(-X1 %*% fit1$b) + 1))
+  fit1$fitted <- drop(1 / (exp(-X1 %*% fit1$b) + 1))
+  fit1$resid <- drop(thetai - fit1$fitted) 
   return(fit1)  
 }
 
@@ -97,6 +98,7 @@ fitPHMC2 <- function(X2, time, status, t0, control,
   fit2$b <- drop(fit2$b)
   names(fit2$b) <- colnames(X22)
   fit2$vb <- with(fit2, ginv(H + n * E) %*% M %*% ginv(H + n * E))
-  fit2$resid <- drop(SSi - exp(-exp(X22 %*% fit2$b)))
+  fit2$fitted <- drop(1 - exp(-exp(X22 %*% fit2$b)))
+  fit2$resid <- -drop(Fi - fit2$fitted)
   return(fit2)  
 }
