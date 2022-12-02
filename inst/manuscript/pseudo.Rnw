@@ -1,0 +1,99 @@
+%% Things to watch out for.
+%% 1. Can't use \input{}
+%% 2. Might need to modify the code display later
+
+\documentclass[sn-mathphys]{sn-jnl}
+
+\jyear{2022}
+
+%% packages and settings used in template
+\theoremstyle{thmstyleone}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{thmstyletwo}
+\newtheorem{example}{Example}
+\newtheorem{remark}{Remark}
+
+\theoremstyle{thmstylethree}
+\newtheorem{definition}{Definition}
+
+\raggedbottom
+
+%% Things that I usually use
+% \usepackage{orcidlink}
+\usepackage{thumbpdf,lmodern}
+\usepackage{amsmath, amsbsy, amsthm, epsfig, epsf, graphicx, amssymb}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+\usepackage{scrextend}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{framed}
+
+%% commands in JSS
+% \newcommand\code{\bgroup\@makeother\_\@makeother\~\@makeother\$\@codex}
+% \def\@codex#1{{\normalfont\ttfamily\hyphenchar\font=-1 #1}\egroup}
+\let\code=\texttt
+\let\proglang=\textsf
+\newcommand{\pkg}[1]{{\fontseries{m}\fontseries{b}\selectfont #1}}
+\newcommand{\E}{\mathsf{E}}
+\newcommand{\Prob}{\mathsf{P}}
+
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+
+%% figures
+\graphicspath{{Figures/}}
+\DeclareGraphicsExtensions{.eps,. ps,. pdf, .jpg, .png}
+
+% knitr
+<<include=FALSE>>=
+library(knitr)
+opts_chunk$set(engine = 'R', tidy = FALSE, prompt = TRUE,
+               fig.width = 7.5, fig.height = 4.5, fig.fullwidth = TRUE,
+               fig.show = "hide", fig.path = "Figures/", size = "small")
+@
+
+<<preliminaries, echo = FALSE, results = 'hide'>>=
+options(prompt = "> ", continue = "+  ", width = 75, useFancyQuotes = FALSE)
+library("MASS")
+@
+
+\begin{document}
+
+\title[Cure models in R]{Cure models with pseudo-observation approaches in \proglang{R}}
+
+
+\author*[1]{\fnm{Sy Han} \sur{Chiou}}\email{schiou@utdallas.edu}
+\author[2]{\fnm{Chien-Lin} \sur{Su}}\email{chien-lin.su@mcgill.ca}
+\author[3]{\fnm{Feng-Chang} \sur{Lin}}\email{flin33@email.unc.edu}
+
+
+\affil*[1]{\orgdiv{Department of Mathematical Sciences}, \orgname{University of Texas at Dallas}, \orgaddress{\street{800 W. Campbell Road}, \city{Richardson}, \postcode{75080}, \state{Texas}, \country{USA}}}
+
+\affil[2]{\orgdiv{Department}, \orgname{Organization}, \orgaddress{\street{Street}, \city{City}, \postcode{10587}, \state{State}, \country{Country}}}
+
+\affil*[1]{\orgdiv{Department of Biostatistics}, \orgname{University of North Carolina, Chapel Hill}, \orgaddress{\street{stree address}, \city{Chapel Hill}, \postcode{27599}, \state{Texas}, \country{USA}}}
+
+
+
+\abstract{The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. Authors are advised to check the author instructions for the journal they are submitting to for word limits and if structural elements like subheadings, citations, or equations are permitted.}
+
+\keywords{bounded cumulative hazard, generalized estimating equation, mixture cure model, penalized regression}
+
+\maketitle
+
+\section{Introduction}
+\label{sect:intro}
+
+Package \pkg{pseudoCure}
+function \code{pCure}
+
+<<load>>=
+library(pseudoCure)
+args(pCure)
+@ 
+
+\bibliography{ref}
+
+\end{document}

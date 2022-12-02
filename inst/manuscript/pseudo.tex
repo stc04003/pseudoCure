@@ -1,0 +1,153 @@
+%% Things to watch out for.
+%% 1. Can't use \input{}
+%% 2. Might need to modify the code display later
+
+\documentclass[sn-mathphys]{sn-jnl}\usepackage[]{graphicx}\usepackage[]{xcolor}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+
+\jyear{2022}
+
+%% packages and settings used in template
+\theoremstyle{thmstyleone}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{thmstyletwo}
+\newtheorem{example}{Example}
+\newtheorem{remark}{Remark}
+
+\theoremstyle{thmstylethree}
+\newtheorem{definition}{Definition}
+
+\raggedbottom
+
+%% Things that I usually use
+% \usepackage{orcidlink}
+\usepackage{thumbpdf,lmodern}
+\usepackage{amsmath, amsbsy, amsthm, epsfig, epsf, graphicx, amssymb}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+\usepackage{scrextend}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{framed}
+
+%% commands in JSS
+% \newcommand\code{\bgroup\@makeother\_\@makeother\~\@makeother\$\@codex}
+% \def\@codex#1{{\normalfont\ttfamily\hyphenchar\font=-1 #1}\egroup}
+\let\code=\texttt
+\let\proglang=\textsf
+\newcommand{\pkg}[1]{{\fontseries{m}\fontseries{b}\selectfont #1}}
+\newcommand{\E}{\mathsf{E}}
+\newcommand{\Prob}{\mathsf{P}}
+
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+
+%% figures
+\graphicspath{{Figures/}}
+\DeclareGraphicsExtensions{.eps,. ps,. pdf, .jpg, .png}
+
+% knitr
+
+
+
+
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+\title[Cure models in R]{Cure models with pseudo-observation approaches in \proglang{R}}
+
+
+\author*[1]{\fnm{Sy Han} \sur{Chiou}}\email{schiou@utdallas.edu}
+\author[2]{\fnm{Chien-Lin} \sur{Su}}\email{chien-lin.su@mcgill.ca}
+\author[3]{\fnm{Feng-Chang} \sur{Lin}}\email{flin33@email.unc.edu}
+
+
+\affil*[1]{\orgdiv{Department of Mathematical Sciences}, \orgname{University of Texas at Dallas}, \orgaddress{\street{800 W. Campbell Road}, \city{Richardson}, \postcode{75080}, \state{Texas}, \country{USA}}}
+
+\affil[2]{\orgdiv{Department}, \orgname{Organization}, \orgaddress{\street{Street}, \city{City}, \postcode{10587}, \state{State}, \country{Country}}}
+
+\affil*[1]{\orgdiv{Department of Biostatistics}, \orgname{University of North Carolina, Chapel Hill}, \orgaddress{\street{stree address}, \city{Chapel Hill}, \postcode{27599}, \state{Texas}, \country{USA}}}
+
+
+
+\abstract{The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. Authors are advised to check the author instructions for the journal they are submitting to for word limits and if structural elements like subheadings, citations, or equations are permitted.}
+
+\keywords{bounded cumulative hazard, generalized estimating equation, mixture cure model, penalized regression}
+
+\maketitle
+
+\section{Introduction}
+\label{sect:intro}
+
+Package \pkg{pseudoCure}
+function \code{pCure}
+
+\begin{knitrout}\small
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{> }\hlkwd{library}\hlstd{(pseudoCure)}
+\hlstd{> }\hlkwd{args}\hlstd{(pCure)}
+\end{alltt}
+\begin{verbatim}
+## function (formula1, formula2, time, status, data, subset, t0, 
+##     model = c("mixture", "promotion"), nfolds = 5, lambda1 = NULL, 
+##     exclude1 = NULL, penalty1 = c("scad", "lasso"), lambda2 = NULL, 
+##     exclude2 = NULL, penalty2 = c("scad", "lasso"), control = list()) 
+## NULL
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\bibliography{ref}
+
+\end{document}
