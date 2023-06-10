@@ -36,6 +36,10 @@
 #' The default value is 5. 
 #' @param control A list of control parameters. See detail.
 #'
+#' @references Su, C.-L., Chiou, S., Lin, F.-C., and Platt, R. W. (2022)
+#' Analysis of survival data with cure fraction and variable selection: A pseudo-observations approach
+#' \emph{Statistical Methods in Medical Research}, \bold{31}(11): 2037--2053.
+#' 
 #' @importFrom stats model.frame model.matrix model.extract 
 #' @importFrom stats .getXlevels formula pnorm quantile runif sd symnum
 #'
