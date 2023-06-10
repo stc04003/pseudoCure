@@ -2,7 +2,7 @@
 % Please edit documentation in R/pCure.R
 \name{pCure.control}
 \alias{pCure.control}
-\title{Pakcage options for pseudoCure}
+\title{Package options for pseudoCure}
 \usage{
 pCure.control(
   binit1 = NULL,

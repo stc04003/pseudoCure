@@ -23,11 +23,12 @@
 #' When not specified, the default values are the 10, 20, ..., 90, 95 percentiles of
 #' uncensored event times.
 #' @param lambda1,lambda2  An option for specifying the tuning parameter used in penalization.
-#' When this is unspecified or has a code{NULL} value,
-#' penalization will not be applied and the \code{pCure} fit will uses all covariates
+#' When this is unspecified or has a \code{NULL} value,
+#' penalization will not be applied and \code{pCure()} will uses all covariates
 #' specified in the formulas.
-#' Alternatively, this can be specified as a numeric vector of non-negative values.
-#' @param penalty1,penalty2 A character string specifying the penality function.
+#' Alternatively, this can be specified as a vector numeric vector of non-negative values
+#' or "auto" for auto selection.
+#' @param penalty1,penalty2 A character string specifying the penalty function.
 #' The available options are code{"scad"} and code{"lasso"}.
 #' @param exclude1,exclude2 A character string specifying variables to
 #' exclude in variable selection.
@@ -142,7 +143,7 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     return(out)
 }
 
-#' Pakcage options for pseudoCure
+#' Package options for pseudoCure
 #'
 #' This function provides the fitting options for the \code{pCure()} function.
 #'

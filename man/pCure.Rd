@@ -55,15 +55,16 @@ correspond to the mixture cure model and the bounded cumulative model, respectiv
 The default value is 5.}
 
 \item{lambda1, lambda2}{An option for specifying the tuning parameter used in penalization.
-When this is unspecified or has a code{NULL} value,
-penalization will not be applied and the \code{pCure} fit will uses all covariates
+When this is unspecified or has a \code{NULL} value,
+penalization will not be applied and \code{pCure()} will uses all covariates
 specified in the formulas.
-Alternatively, this can be specified as a numeric vector of non-negative values.}
+Alternatively, this can be specified as a vector numeric vector of non-negative values
+or "auto" for auto selection.}
 
 \item{exclude1, exclude2}{A character string specifying variables to
 exclude in variable selection.}
 
-\item{penalty1, penalty2}{A character string specifying the penality function.
+\item{penalty1, penalty2}{A character string specifying the penalty function.
 The available options are code{"scad"} and code{"lasso"}.}
 
 \item{control}{A list of control parameters. See detail.}
