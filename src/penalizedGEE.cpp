@@ -141,7 +141,7 @@ Rcpp::List pgee(arma::vec y,
     arma::vec ym = y - mu;
     arma::mat bigD = matvec(X, etamu);
     arma::mat Rhat(k, k, arma::fill::eye);
-    double ahat = 0;
+    double ahat = 0;         
     if (corstr == "ex" && k > 1) {
       ahat = ahatEx(ym / stddev(mu), nt, index);
       Rhat = Rhat * (1 - ahat) + ahat;
@@ -215,11 +215,17 @@ Rcpp::List gee(arma::vec y,
     arma::mat Rhat(k, k, arma::fill::eye);
     double ahat = 0;
     if (corstr == "ex" && k > 1) {
-      ahat = ahatEx(ym / stddev(mu), nt, index);
+      if (stddev(mu) > 0)
+	ahat = ahatEx(ym / stddev(mu), nt, index);
+      else
+	ahat = ahatEx(ym, nt, index);
       Rhat = Rhat * (1 - ahat) + ahat;
     }
     if (corstr == "ar1" && k > 1) {
-      ahat = ahatAR1(ym / stddev(mu), nt, index);
+      if (stddev(mu) > 0)
+	ahat = ahatAR1(ym / stddev(mu), nt, index);
+      else
+	ahat = ahatAR1(ym, nt, index);
       arma::vec tmp(k - 1, arma::fill::value(ahat));
       arma::mat Rhat2(k, k, arma::fill::zeros);
       tmp = cumprod(tmp);
