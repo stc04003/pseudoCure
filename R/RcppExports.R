@@ -21,3 +21,23 @@ pseudoKM1 <- function(Time, censor, Q) {
     .Call(`_pseudoCure_pseudoKM1`, Time, censor, Q)
 }
 
+#' @noRd
+fastDabrowska <- function(tx, ty, x, y, dx, dy, L) {
+    .Call(`_pseudoCure_fastDabrowska`, tx, ty, x, y, dx, dy, L)
+}
+
+#' @noRd
+fastL <- function(x1, y1, dx1, dy1) {
+    .Call(`_pseudoCure_fastL`, x1, y1, dx1, dy1)
+}
+
+#' @noRd
+fastTau2 <- function(x1, y1, dx1, dy1) {
+    .Call(`_pseudoCure_fastTau2`, x1, y1, dx1, dy1)
+}
+
+#' @noRd
+pseudoTau <- function(x1, y1, dx1, dy1) {
+    .Call(`_pseudoCure_pseudoTau`, x1, y1, dx1, dy1)
+}
+

@@ -1,6 +1,6 @@
 Package: pseudoCure
 Title: A Pseudo-Observations Approach for Analyzing Survival Data with a Cure Fraction
-Version: 0.0.1
+Version: 0.0.0
 Authors@R: c(person(given = "Sy Han (Steven)", family = "Chiou",
 	   email = "schiou@utdallas.edu",
 	   role = c("aut", "cre")),
@@ -13,7 +13,7 @@ Description: A collection of easy-to-use tools for regression analysis of surviv
 License: GPL (>= 2)
 Depends: R (>= 4.2.0)
 LinkingTo: Rcpp, RcppArmadillo
-RoxygenNote: 7.2.1
+RoxygenNote: 7.3.1
 NeedsCompilation: yes
 Packaged: 2022-09-12 10:41:11 UTC; schiou
 Encoding: UTF-8

@@ -2,8 +2,8 @@
 % Please edit documentation in R/pseudoCure_pkg.R
 \docType{package}
 \name{pseudoCure-package}
+\alias{pseudoCure}
 \alias{pseudoCure-package}
-\alias{_PACKAGE}
 \alias{pseudoCure-packages}
 \title{pseudoCure: A pseudo-observations approach for analyzing survival data with a cure fraction}
 \description{
@@ -18,8 +18,8 @@ embedded in the variable selection procedure.
 
 Authors:
 \itemize{
-  \item Chien-Lin  Su \email{chien-lin.su@mail.mcgill.ca}
-  \item Feng-Chang  Lin \email{flin@bios.unc.edu}
+  \item Chien-Lin Su \email{chien-lin.su@mail.mcgill.ca}
+  \item Feng-Chang Lin \email{flin@bios.unc.edu}
 }
 
 }
