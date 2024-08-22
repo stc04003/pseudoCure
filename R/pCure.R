@@ -53,6 +53,8 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     model <- match.arg(model)
     penalty1 <- match.arg(penalty1)
     penalty2 <- match.arg(penalty2)
+    ## terms to exclude if ~. is used
+    fExcl <- c(deparse(substitute(time)), deparse(substitute(status)))
     ## Checks and define control
     if (is.null.missing(formula1) & is.null.missing(formula2))
       stop("At least one 'formula' need to be specified.")
@@ -124,7 +126,11 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
       xlevel2 <- .getXlevels(attr(mf, "terms"), mf)
       mm2 <- stats::model.matrix(formula2, data = mf)
       mm2 <- mm2[, colnames(mm2) != "(Intercept)"]   
-    }    
+    }
+    if (formula1 == as.formula("~."))
+      mm1 <- mm1[, !(colnames(mm1) %in% c(fExcl, "`(time)`", "`(status)`"))]
+    if (formula2 == as.formula("~."))
+      mm2 <- mm2[, !(colnames(mm2) %in% c(fExcl, "`(time)`", "`(status)`"))]
     tmax <- max(time[status > 0])
     if (missing(t0)) t0 <- quantile(time[status > 0], c(1:9 / 10, .95))
     ## auto choose lambda; still under development
