@@ -44,7 +44,7 @@ the mixture cure model and the bounded cumulative model, respectively.}
 observations to be used in the fitting process.}
 
 \item{t0}{A vector of times, where the pseudo-observations are constructed.
-When not specified, the default values are the 10, 20, ..., 90, 95 percentiles of
+When not specified, the default values are the 10, 20, ..., 90th percentiles of
 uncensored event times.}
 
 \item{model}{A character string specifying the underlying model.
@@ -65,7 +65,7 @@ or "auto" for auto selection.}
 exclude in variable selection.}
 
 \item{penalty1, penalty2}{A character string specifying the penalty function.
-The available options are code{"scad"} and code{"lasso"}.}
+The available options are \code{"scad"} and \code{"lasso"}.}
 
 \item{control}{A list of control parameters. See detail.}
 }

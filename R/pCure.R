@@ -166,7 +166,6 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
 #' and \code{"ar1"}.
 #' @param nlambda1,nlambda2 An integer value specifying the number of lambda.
 #' This is only evoked when \code{lambda1 = "auto"} or \code{lambda2 = "auto"}.
-#' @param eps A positive numerical value used to ...
 #' @param tol A positive numerical value specifying the absolute error tolerance in GEE algorithms.
 #' @param maxit An integer value specifying the maximum number of iteration.
 #' 
@@ -175,11 +174,11 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
 pCure.control <- function(binit1 = NULL, binit2 = NULL,
                           corstr = c("independence", "exchangeable", "ar1"),
                           nlambda1 = 100, nlambda2 = 100,
-                          eps = 1e-6, tol = 1e-7, maxit = 100) {
+                          tol = 1e-7, maxit = 100) {
     corstr <- match.arg(corstr)
     list(nlambda1 = 100, nlambda2 = 100,
          binit1 = binit1, binit2 = binit2, corstr = corstr,
-         eps = eps, tol = tol, maxit = maxit)
+         eps = 1e-6, tol = tol, maxit = maxit)
 }
 
 

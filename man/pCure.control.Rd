@@ -10,7 +10,6 @@ pCure.control(
   corstr = c("independence", "exchangeable", "ar1"),
   nlambda1 = 100,
   nlambda2 = 100,
-  eps = 1e-06,
   tol = 1e-07,
   maxit = 100
 )
@@ -28,8 +27,6 @@ and \code{"ar1"}.}
 
 \item{nlambda1, nlambda2}{An integer value specifying the number of lambda.
 This is only evoked when \code{lambda1 = "auto"} or \code{lambda2 = "auto"}.}
-
-\item{eps}{A positive numerical value used to ...}
 
 \item{tol}{A positive numerical value specifying the absolute error tolerance in GEE algorithms.}
 
