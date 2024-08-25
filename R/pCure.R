@@ -20,7 +20,7 @@
 #' The available functional form are \code{"mixture"} and \code{"promotion"}
 #' correspond to the mixture cure model and the bounded cumulative model, respectively.
 #' @param t0 A vector of times, where the pseudo-observations are constructed.
-#' When not specified, the default values are the 10, 20, ..., 90, 95 percentiles of
+#' When not specified, the default values are the 10, 20, ..., 90th percentiles of
 #' uncensored event times.
 #' @param lambda1,lambda2  An option for specifying the tuning parameter used in penalization.
 #' When this is unspecified or has a \code{NULL} value,
@@ -29,7 +29,7 @@
 #' Alternatively, this can be specified as a vector numeric vector of non-negative values
 #' or "auto" for auto selection.
 #' @param penalty1,penalty2 A character string specifying the penalty function.
-#' The available options are code{"scad"} and code{"lasso"}.
+#' The available options are \code{"scad"} and \code{"lasso"}.
 #' @param exclude1,exclude2 A character string specifying variables to
 #' exclude in variable selection.
 #' @param nfolds An optional integer value specifying the number of folds.
@@ -177,8 +177,8 @@ pCure.control <- function(binit1 = NULL, binit2 = NULL,
                           nlambda1 = 100, nlambda2 = 100,
                           eps = 1e-6, tol = 1e-7, maxit = 100) {
     corstr <- match.arg(corstr)
-    list(binit1 = binit1, binit2 = binit2, corstr = corstr,
-         nlambda1 = 100, nlambda2 = 100,
+    list(nlambda1 = 100, nlambda2 = 100,
+         binit1 = binit1, binit2 = binit2, corstr = corstr,
          eps = eps, tol = tol, maxit = maxit)
 }
 
