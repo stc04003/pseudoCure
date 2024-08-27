@@ -47,8 +47,8 @@
 #' @export
 pCure <- function(formula1, formula2, time, status, data, subset, t0, 
                   model = c("mixture", "promotion"), nfolds = 5,
-                  lambda1 = NULL, exclude1 = NULL, penalty1 = c("scad", "lasso"), 
-                  lambda2 = NULL, exclude2 = NULL, penalty2 = c("scad", "lasso"),
+                  lambda1 = NULL, exclude1 = NULL, penalty1 = c("lasso", "scad"), 
+                  lambda2 = NULL, exclude2 = NULL, penalty2 = c("lasso", "scad"),
                   control = list()) {
     model <- match.arg(model)
     penalty1 <- match.arg(penalty1)
@@ -127,9 +127,9 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
       mm2 <- stats::model.matrix(formula2, data = mf)
       mm2 <- mm2[, colnames(mm2) != "(Intercept)"]   
     }
-    if (formula1 == as.formula("~."))
+    if (!is.null.missing(formula1) && formula1 == as.formula("~."))
       mm1 <- mm1[, !(colnames(mm1) %in% c(fExcl, "`(time)`", "`(status)`"))]
-    if (formula2 == as.formula("~."))
+    if (!is.null.missing(formula2) && formula2 == as.formula("~."))
       mm2 <- mm2[, !(colnames(mm2) %in% c(fExcl, "`(time)`", "`(status)`"))]
     tmax <- max(time[status > 0])
     if (missing(t0)) t0 <- quantile(time[status > 0], c(1:9 / 10, .95))
@@ -176,7 +176,7 @@ pCure.control <- function(binit1 = NULL, binit2 = NULL,
                           nlambda1 = 100, nlambda2 = 100,
                           tol = 1e-7, maxit = 100) {
     corstr <- match.arg(corstr)
-    list(nlambda1 = 100, nlambda2 = 100,
+    list(nlambda1 = 200, nlambda2 = 200,
          binit1 = binit1, binit2 = binit2, corstr = corstr,
          eps = 1e-6, tol = tol, maxit = maxit)
 }

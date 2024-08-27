@@ -22,6 +22,8 @@ fitPHMC1 <- function(X1, time, status, control,
     curei <- KMs[1:n]
   }
   thetai <- n * (1 - cure) - (n - 1) * (1 - curei)
+  ## thetai <- ifelse(thetai < 0, 0, thetai)
+  
   if (is.null(control$binit1)) control$binit1 <- rep(0, ncol(X1))
   if (is.null(control$exclude1)) control$exclude1 <- rep(0, ncol(X1))
   if (is.null(control$lambda1))
