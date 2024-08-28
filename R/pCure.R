@@ -29,9 +29,10 @@
 #' Alternatively, this can be specified as a vector numeric vector of non-negative values
 #' or "auto" for auto selection.
 #' @param penalty1,penalty2 A character string specifying the penalty function.
-#' The available options are \code{"scad"} and \code{"lasso"}.
-#' @param exclude1,exclude2 A character string specifying variables to
-#' exclude in variable selection.
+#' The available options are \code{"lasso"} and \code{"scad"}.
+#' @param exclude1,exclude2 A binary numerical vector specifying which variables to exclude in variable selection.
+#' The length of \code{exclude} must match with the number of covariates.
+#' A value of 1 means to exclude in the variable selection.
 #' @param nfolds An optional integer value specifying the number of folds.
 #' The default value is 5. 
 #' @param control A list of control parameters. See detail.
@@ -57,7 +58,7 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     fExcl <- c(deparse(substitute(time)), deparse(substitute(status)))
     ## Checks and define control
     if (is.null.missing(formula1) & is.null.missing(formula2))
-      stop("At least one 'formula' need to be specified.")
+      stop("At least one 'formula' needs to be specified.")
     if (missing(time)) stop("Argument 'time' is required.")
     if (missing(status)) stop("Argument 'status' is required.")
     if (!is.null(lambda1) && !is.character(lambda1) && any(lambda1 < 0))

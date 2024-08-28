@@ -16,10 +16,10 @@ pCure(
   nfolds = 5,
   lambda1 = NULL,
   exclude1 = NULL,
-  penalty1 = c("scad", "lasso"),
+  penalty1 = c("lasso", "scad"),
   lambda2 = NULL,
   exclude2 = NULL,
-  penalty2 = c("scad", "lasso"),
+  penalty2 = c("lasso", "scad"),
   control = list()
 )
 }
@@ -61,11 +61,12 @@ specified in the formulas.
 Alternatively, this can be specified as a vector numeric vector of non-negative values
 or "auto" for auto selection.}
 
-\item{exclude1, exclude2}{A character string specifying variables to
-exclude in variable selection.}
+\item{exclude1, exclude2}{A binary numerical vector specifying which variables to exclude in variable selection.
+The length of \code{exclude} must match with the number of covariates.
+A value of 1 means to exclude in the variable selection.}
 
 \item{penalty1, penalty2}{A character string specifying the penalty function.
-The available options are \code{"scad"} and \code{"lasso"}.}
+The available options are \code{"lasso"} and \code{"scad"}.}
 
 \item{control}{A list of control parameters. See detail.}
 }

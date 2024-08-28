@@ -13,7 +13,7 @@ Description: A collection of easy-to-use tools for regression analysis of surviv
 License: GPL (>= 2)
 Depends: R (>= 4.2.0)
 LinkingTo: Rcpp, RcppArmadillo
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 NeedsCompilation: yes
 Packaged: 2022-09-12 10:41:11 UTC; schiou
 Encoding: UTF-8
