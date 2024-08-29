@@ -43,10 +43,9 @@
 geelm <- function(formula, data, subset, id, 
                  link = c("identity", "log", "cloglog", "logit"),
                  corstr = c("independence", "exchangeable", "ar1"), 
-                 lambda, nfolds = 5, nlambda = 100, exclude, 
-                 penalty = c("lasso", "scad"),
-                 binit,
-                 tol = 1e-7, maxit = 100) {  
+                 lambda, exclude, penalty = c("lasso", "scad"),
+                 nfolds = 5, nlambda = 100, 
+                 binit, tol = 1e-7, maxit = 100) {  
   link <- match.arg(link)
   corstr <- match.arg(corstr)
   penalty <- match.arg(penalty)
