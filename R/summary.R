@@ -9,12 +9,12 @@ print.pCure <- function(x, cutoff = 1e-3, ...) {
   dput(x$call)
   if (all(is.null(x$control$lambda1), is.null(x$control$lambda2))) {
     if (x$control$model == "mixture")
-      cat("\nFitted with the mixture cure rate model")
+      cat("\nFitted with the mixture cure model")
     if (x$control$model == "promotion")
       cat("\nFitted with the promotion time model")
   } else {
     if (x$control$model == "mixture")
-      cat("\nFitted with the penalized mixture cure rate model")
+      cat("\nFitted with the penalized mixture cure model")
     if (x$control$model == "promotion")
       cat("\nFitted with the penalized promotion time model")
   }
@@ -64,12 +64,12 @@ print.summary.pCure <- function(x, ...) {
   dput(x$call)
   if (all(is.null(x$control$lambda1), is.null(x$control$lambda2))) {
     if (x$control$model == "mixture")
-      cat("\nFitted with the mixture cure rate model")
+      cat("\nFitted with the mixture cure model")
     if (x$control$model == "promotion")
       cat("\nFitted with the promotion time model")
   } else {
     if (x$control$model == "mixture")
-      cat("\nFitted with the penalized mixture cure rate model")
+      cat("\nFitted with the penalized mixture cure model")
     if (x$control$model == "promotion")
       cat("\nFitted with the penalized promotion time model")
   }

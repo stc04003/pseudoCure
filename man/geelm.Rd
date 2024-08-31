@@ -12,10 +12,10 @@ geelm(
   link = c("identity", "log", "cloglog", "logit"),
   corstr = c("independence", "exchangeable", "ar1"),
   lambda,
-  nfolds = 5,
-  nlambda = 100,
   exclude,
   penalty = c("lasso", "scad"),
+  nfolds = 5,
+  nlambda = 200,
   binit,
   tol = 1e-07,
   maxit = 100
@@ -45,18 +45,18 @@ specified in the formulas.
 Alternatively, this can be specified as a vector numeric vector of non-negative values
 or "auto" for auto selection.}
 
-\item{nfolds}{An optional integer value specifying the number of folds.
-The default value is 5.}
-
-\item{nlambda}{An optional integer value specifying the number of tuning parameters to try
-if \code{lambda = "auto"}.}
-
 \item{exclude}{A binary numerical vector specifying which variables to exclude in variable selection.
 The length of \code{exclude} must match with the number of covariates.
 A value of 1 means to exclude in the variable selection.}
 
 \item{penalty}{A character string specifying the penalty function.
 The available options are \code{"lasso"} and \code{"scad"}.}
+
+\item{nfolds}{An optional integer value specifying the number of folds.
+The default value is 5.}
+
+\item{nlambda}{An optional integer value specifying the number of tuning parameters to try
+if \code{lambda = "auto"}.}
 
 \item{binit}{A optional numerical vector for the initial value.
 A zero vector is used when not specified.}

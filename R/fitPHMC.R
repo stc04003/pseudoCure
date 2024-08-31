@@ -22,17 +22,19 @@ fitPHMC1 <- function(X1, time, status, control,
     curei <- KMs[1:n]
   }
   thetai <- n * (1 - cure) - (n - 1) * (1 - curei)
-  ## thetai <- ifelse(thetai < 0, 0, thetai)
-  
   if (is.null(control$binit1)) control$binit1 <- rep(0, ncol(X1))
-  if (is.null(control$exclude1)) control$exclude1 <- rep(0, ncol(X1))
-  if (is.null(control$lambda1))
-    fit1 <- gee(thetai, X1, control$binit1, rep(1, n), "logit", "ind", control$tol, control$maxit)
-  else if (length(control$lambda1) == 1)
+  if (is.null(control$exclude1)) control$exclude1 <- rep(0, ncol(X1))  
+  ## if (is.null(control$lambda1))
+  fit1 <- gee(thetai, X1, control$binit1, rep(1, n), "logit", "ind", control$tol, control$maxit)
+  if (!is.null(control$lambda1)) {
+    control$binit1 <- fit1$b
+    fit1 <- NULL
+  }
+  if (length(control$lambda1) == 1)
     fit1 <- pgee(thetai, X1, control$binit1, rep(1, n), control$exclude1,
                  "logit", control$penalty1, "ind",
                  control$lambda1, control$eps, control$tol, control$maxit)
-  else {
+  if (length(control$lambda1) > 1) {
     cv.raw1 <- pgeeCV(thetai, X1, control$binit1, rep(1, n), control$exclude1,
                       "logit", control$penalty1, "ind", control$nfolds, 
                       control$lambda1, control$eps, control$tol, control$maxit)
@@ -75,14 +77,17 @@ fitPHMC2 <- function(X2, time, status, t0, control,
   colnames(X22) <- c(paste("t", seq_along(t0), sep = ""), colnames(X2))
   if (is.null(control$binit2)) control$binit2 <- rep(0, ncol(X22))
   if (is.null(control$exclude2)) control$exclude2 <- rep(0, ncol(X22))
-  if (is.null(control$lambda2))
-    fit2 <- gee(Fi, X22, control$binit2, nt, "cloglog",
-                control$corstr, control$tol, control$maxit)
-  else if (length(control$lambda2) == 1)
+  fit2 <- gee(Fi, X22, control$binit2, nt, "cloglog",
+              control$corstr, control$tol, control$maxit)
+  if (!is.null(control$lambda2)) {
+    control$binit2 <- fit2$b
+    fit2 <- NULL
+  }  
+  if (length(control$lambda2) == 1)
     fit2 <- pgee(Fi, X22, control$binit2, nt, control$exclude2, "cloglog",
                  control$penalty2, control$corstr, control$lambda2,
                  control$eps, control$tol, control$maxit)
-  else {
+  if (length(control$lambda2) > 1) {
     cv.raw2 <- pgeeCV(Fi, X22, control$binit2, nt, control$exclude2,
                       "cloglog", control$penalty2, control$corstr, control$nfolds, 
                       control$lambda2, control$eps, control$tol, control$maxit)

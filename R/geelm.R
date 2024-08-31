@@ -82,8 +82,8 @@ geelm <- function(formula, data, subset, id,
   if (missing(id) || is.null(id)) id <- 1:nrow(mm)
   if (missing(lambda)) lambda <- 0
   if (missing(exclude)) exclude <- rep(0, p)
-  if (all(lambda == 0))
-    fit <- gee(y, mm, binit, as.numeric(table(id)), link, corstr, tol, maxit)
+  fit <- gee(y, mm, binit, as.numeric(table(id)), link, corstr, tol, maxit)
+  if (!all(lambda == 0)) binit <- as.numeric(fit$b)  
   if (is.character(lambda) && lambda == "auto") {
     trys <- exp(-7:10)
     lambda.max <- max(trys)
@@ -197,4 +197,68 @@ residuals.geelm <- function(object, ...) {
 fitted.geelm <- function(object, ...) {
   object$fitted
 }
+
+
+#' @exportS3Method plot geelm
+plot.geelm <- function(object, part = "both", type = c("residuals", "cv", "trace"),...) {
+  type <- match.arg(type, c("residuals", "cv", "trace"))
+  if (type == "residuals") {
+    dat <- data.frame(fitted = unlist(fitted(object)),
+                      resid = unlist(resid(object)))
+    tmp <- lapply(fitted(object), length)
+    p <- ggplot(dat, aes(x = fitted,y = resid)) +
+      geom_point() + xlab("Fitted values") + ylab("Residuals")
+  }
+  else {
+    if (is.null(object$lambda)) 
+      stop("No tuning parameters for penalization have been detected.")
+  }
+  if (type == "cv") {    
+    d1 <- data.frame(lambda = object$lambda,
+                     mean = colMeans(object$cv.raw),
+                     sd = apply(object$cv.raw, 2, sd))
+    if (nrow(d1) > 0) {
+      if (call_args(object$call)$lambda == "auto") {
+        d1$lambda <- log(d1$lambda)
+        xlab <- expression(log(lambda))
+      } else
+        xlab <- expression(lambda)
+      p <- ggplot(d1, aes(x = lambda, y = mean)) +
+        geom_point() + 
+        geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = .002) +
+        geom_point(data = d1[which.min(d1$mean),], color = "red") +
+        geom_errorbar(data = d1[which.min(d1$mean),], aes(ymin = mean - sd, ymax = mean + sd), width = .002, color = "red") +
+        ylab("Prediction error")
+    }
+  }
+  if (type == "trace") {
+    coef1 <- sapply(object$lambda, function(i) update(object, lambda = i)$b)
+    coef1 <- coef1[rownames(coef1) != "(Intercept)",]
+    d1 <- data.frame(coef = c(coef1),
+                     variable = rownames(coef1),
+                     lambda = rep(object$lambda, each = nrow(coef1)))
+    if (nrow(d1) > 0) {
+      coef10 <- t(ifelse(coef1 < 1e-3, 0, coef1))
+      if (call_args(object$call)$lambda == "auto") {
+        keep1 <- !duplicated(coef10)
+        d1 <- subset(d1, lambda %in% object$lambda[keep1])
+      }
+      xint <- unique(d1$lambda[d1$lambda == object$lambda.min])
+      if (call_args(object$call)$lambda == "auto") {
+        d1$lambda <- log(d1$lambda)
+        xlab <- expression(log(lambda))
+        xint <- log(xint)
+      } else
+        xlab <- expression(lambda)
+      p <- ggplot(d1, aes(x = lambda, y = coef, color = variable)) +
+        geom_line() + scale_x_reverse() +
+        geom_vline(xintercept = xint, linetype="dotted") + 
+        ylab("Coefficients") + xlab(xlab)
+    }
+  }
+  p
+}
+
+
+
 

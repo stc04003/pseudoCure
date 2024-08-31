@@ -14,11 +14,11 @@ The pseudo-observations approach is utilized to assess covariate effects and
 embedded in the variable selection procedure.
 }
 \author{
-\strong{Maintainer}: Sy Han (Steven) Chiou \email{schiou@utdallas.edu}
+\strong{Maintainer}: Sy Han (Steven) Chiou \email{schiou@smu.edu}
 
 Authors:
 \itemize{
-  \item Chien-Lin Su \email{chien-lin.su@mail.mcgill.ca}
+  \item Chien-Lin Su \email{marksu740824@gmail.com}
   \item Feng-Chang Lin \email{flin@bios.unc.edu}
 }
 
