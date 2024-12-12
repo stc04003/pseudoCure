@@ -39,6 +39,7 @@
 #' Default at 100.
 #'
 #' @importFrom rlang f_rhs
+#' @importFrom stats update model.response fitted resid
 #' @export
 geelm <- function(formula, data, subset, id, 
                  link = c("identity", "log", "cloglog", "logit"),
@@ -198,27 +199,39 @@ fitted.geelm <- function(object, ...) {
   object$fitted
 }
 
+#' @import utils 
+utils::globalVariables(c("variable", "lambda"))
 
+#' Plot method for 'geelm' objects 
+#'
+#' @param x An object of class 'pCure', usually returned by the 'pCure()' function.
+#' @param type A character string specifying the type of plot to generate.
+#' Available options are "residuals," "cv," and "trace,"
+#' which correspond to the pseudo-residual plot, cross-validation plot,
+#' and trace plot for different values of the tuning parameter, respectively.
+#' @param ... Other arguments for future extension.
+#' 
 #' @exportS3Method plot geelm
-plot.geelm <- function(object, part = "both", type = c("residuals", "cv", "trace"),...) {
+plot.geelm <- function(x, type = c("residuals", "cv", "trace"),...) {
+  if (!is.geelm(x)) stop("Must be a geelm x")
   type <- match.arg(type, c("residuals", "cv", "trace"))
   if (type == "residuals") {
-    dat <- data.frame(fitted = unlist(fitted(object)),
-                      resid = unlist(resid(object)))
-    tmp <- lapply(fitted(object), length)
+    dat <- data.frame(fitted = unlist(fitted(x)),
+                      resid = unlist(resid(x)))
+    tmp <- lapply(fitted(x), length)
     p <- ggplot(dat, aes(x = fitted,y = resid)) +
       geom_point() + xlab("Fitted values") + ylab("Residuals")
   }
   else {
-    if (is.null(object$lambda)) 
+    if (is.null(x$lambda)) 
       stop("No tuning parameters for penalization have been detected.")
   }
   if (type == "cv") {    
-    d1 <- data.frame(lambda = object$lambda,
-                     mean = colMeans(object$cv.raw),
-                     sd = apply(object$cv.raw, 2, sd))
+    d1 <- data.frame(lambda = x$lambda,
+                     mean = colMeans(x$cv.raw),
+                     sd = apply(x$cv.raw, 2, sd))
     if (nrow(d1) > 0) {
-      if (call_args(object$call)$lambda == "auto") {
+      if (call_args(x$call)$lambda == "auto") {
         d1$lambda <- log(d1$lambda)
         xlab <- expression(log(lambda))
       } else
@@ -232,19 +245,19 @@ plot.geelm <- function(object, part = "both", type = c("residuals", "cv", "trace
     }
   }
   if (type == "trace") {
-    coef1 <- sapply(object$lambda, function(i) update(object, lambda = i)$b)
+    coef1 <- sapply(x$lambda, function(i) update(x, lambda = i)$b)
     coef1 <- coef1[rownames(coef1) != "(Intercept)",]
     d1 <- data.frame(coef = c(coef1),
                      variable = rownames(coef1),
-                     lambda = rep(object$lambda, each = nrow(coef1)))
+                     lambda = rep(x$lambda, each = nrow(coef1)))
     if (nrow(d1) > 0) {
       coef10 <- t(ifelse(coef1 < 1e-3, 0, coef1))
-      if (call_args(object$call)$lambda == "auto") {
+      if (call_args(x$call)$lambda == "auto") {
         keep1 <- !duplicated(coef10)
-        d1 <- subset(d1, lambda %in% object$lambda[keep1])
+        d1 <- subset(d1, lambda %in% x$lambda[keep1])
       }
-      xint <- unique(d1$lambda[d1$lambda == object$lambda.min])
-      if (call_args(object$call)$lambda == "auto") {
+      xint <- unique(d1$lambda[d1$lambda == x$lambda.min])
+      if (call_args(x$call)$lambda == "auto") {
         d1$lambda <- log(d1$lambda)
         xlab <- expression(log(lambda))
         xint <- log(xint)

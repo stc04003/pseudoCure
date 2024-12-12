@@ -152,64 +152,80 @@ fitted.pCure <- function(object, part = "both", ...) {
   else return(out[[part]])
 }
 
+#' @import utils 
+utils::globalVariables(c("vari", "lam"))
 
-#' @importFrom ggplot2 ggplot geom_point geom_line  geom_errorbar ggtitle scale_x_reverse xlab ylab aes geom_vline
+#' Plot method for 'pCure' objects 
+#'
+#' @param x An object of class 'pCure', usually returned by the 'pCure()' function.
+#' @param part A character string specifies which component of the cure model to plot.
+#' The default is "both", which plots both the incidence and latency components if a
+#' mixture cure model was fitted,
+#' or both the long- and short-term effects if a promotion time model was fitted.
+#' @param type A character string specifying the type of plot to generate.
+#' Available options are "residuals," "cv," and "trace,"
+#' which correspond to the pseudo-residual plot, cross-validation plot,
+#' and trace plot for different values of the tuning parameter, respectively.
+#' @param ... Other arguments for future extension.
+#' 
+#' @importFrom ggplot2 ggplot geom_point geom_line  geom_errorbar ggtitle scale_x_reverse geom_vline
+#' @importFrom ggplot2 xlab ylab aes 
 #' @importFrom rlang call_args
 #' @importFrom ggpubr ggarrange
-#' 
+#'
 #' @exportS3Method plot pCure
-plot.pCure <- function(object, part = "both", type = c("residuals", "cv", "trace"),...) {
+plot.pCure <- function(x, part = "both", type = c("residuals", "cv", "trace"),...) {
+  if (!is.pCure(x)) stop("Must be a pCure object")
   type <- match.arg(type, c("residuals", "cv", "trace"))
   if (type == "residuals") {
-    dat <- data.frame(fitted = unlist(fitted(object)),
-                      resid = unlist(resid(object)))
-    tmp <- lapply(fitted(object), length)
-    dat$Component <- rep(names(tmp), unlist(tmp))
-    if (object$control$model == "mixture") 
+    dat <- data.frame(fitted = unlist(fitted(x)),
+                      resid = unlist(resid(x)))
+    tmp <- lapply(fitted(x), length)
+    dat$Comp <- rep(names(tmp), unlist(tmp))
+    if (x$control$model == "mixture") 
       part <- match.arg(part, c("both", "incidence", "latency"))
-    if (object$control$model == "promotion") 
+    if (x$control$model == "promotion") 
       part <- match.arg(part, c("both", "long", "short"))
-    if (part != "both") dat <- subset(dat, Component == part)
-    if (length(unique(dat$Component)) == 1)
+    if (part != "both") dat <- dat[dat$Comp == part,] # subset(dat, Comp == part)
+    if (length(unique(dat$Comp)) == 1)
       p <- ggplot(dat, aes(x = fitted,y = resid))
     else 
-      p <- ggplot(dat, aes(x = fitted,y = resid, color = Component))
+      p <- ggplot(dat, aes(x = fitted,y = resid, color = dat$Comp))
     p <- p + geom_point() + xlab("Fitted values") + ylab("Residuals")
   }
   else {
-    if (is.null(object$control$lambda1) & is.null(object$control$lambda2)) 
+    if (is.null(x$control$lambda1) & is.null(x$control$lambda2)) 
       stop("No tuning parameters for penalization have been detected.")
   }
   if (type == "cv") {    
-    d1 <- data.frame(lambda = object$control$lambda1,
-                     mean = colMeans(object$fit1$cv.raw),
-                     sd = apply(object$fit1$cv.raw, 2, sd))
-    d2 <- data.frame(lambda = object$control$lambda2,
-                     mean = colMeans(object$fit2$cv.raw),
-                     sd = apply(object$fit2$cv.raw, 2, sd))
+    d1 <- data.frame(lam = x$control$lambda1,
+                     mean = colMeans(x$fit1$cv.raw),
+                     sd = apply(x$fit1$cv.raw, 2, sd))
+    d2 <- data.frame(lam = x$control$lambda2,
+                     mean = colMeans(x$fit2$cv.raw),
+                     sd = apply(x$fit2$cv.raw, 2, sd))
     if (nrow(d1) > 0) {
-      if (call_args(object$call)$lambda1 == "auto") {
-        d1$lambda <- log(d1$lambda)
+      if (call_args(x$call)$lambda1 == "auto") {
+        d1$lam <- log(d1$lam)
         xlab <- expression(log(lambda))
       } else
         xlab <- expression(lambda)
-      title <- ifelse(object$control$model == "mixture", "Incidence component", "Long-term effect")
-      p1 <- ggplot(d1, aes(x = lambda, y = mean)) +
+      title <- ifelse(x$control$model == "mixture", "Incidence component", "Long-term effect")
+      p1 <- ggplot(d1, aes(x = lam, y = mean)) +
         geom_point() + 
         geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = .002) +
         geom_point(data = d1[which.min(d1$mean),], color = "red") +
         geom_errorbar(data = d1[which.min(d1$mean),], aes(ymin = mean - sd, ymax = mean + sd), width = .002, color = "red") +
         ylab("Prediction error") + ggtitle(title) + xlab(xlab)
     }
-
     if (nrow(d2) > 0) {
-      if (call_args(object$call)$lambda2 == "auto") {
-        d2$lambda <- log(d2$lambda)
+      if (call_args(x$call)$lambda2 == "auto") {
+        d2$lam <- log(d2$lam)
         xlab <- expression(log(lambda))
       } else
         xlab <- expression(lambda)
-      title <- ifelse(object$control$model == "mixture", "Latency component", "Short-term effect")      
-      p2 <- ggplot(d2, aes(x = lambda, y = mean)) +
+      title <- ifelse(x$control$model == "mixture", "Latency component", "Short-term effect")      
+      p2 <- ggplot(d2, aes(x = lam, y = mean)) +
         geom_point() + 
         geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = .002) +
         geom_point(data = d2[which.min(d2$mean),], color = "red") +
@@ -219,50 +235,50 @@ plot.pCure <- function(object, part = "both", type = c("residuals", "cv", "trace
     p <- ggarrange(p1, p2, ncol = 1)    
   }
   if (type == "trace") {
-    coef1 <- sapply(object$control$lambda1, function(i) update(object, lambda1 = i, formula2 = NULL, lambda2 = NULL)$fit1$b)
-    coef2 <- sapply(object$control$lambda2, function(i) update(object, lambda2 = i, formula1 = NULL, lambda1 = NULL)$fit2$b)
+    coef1 <- sapply(x$control$lambda1, function(i) update(x, lambda1 = i, formula2 = NULL, lambda2 = NULL)$fit1$b)
+    coef2 <- sapply(x$control$lambda2, function(i) update(x, lambda2 = i, formula1 = NULL, lambda1 = NULL)$fit2$b)
     coef1 <- coef1[rownames(coef1) != "(Intercept)",]
     coef2 <- coef2[rownames(coef2) %in% rownames(coef1),]
     d1 <- data.frame(coef = c(coef1),
-                     variable = rownames(coef1),
-                     lambda = rep(object$control$lambda1, each = nrow(coef1)))
+                     vari = rownames(coef1),
+                     lam = rep(x$control$lambda1, each = nrow(coef1)))
     d2 <- data.frame(coef = c(coef2),
-                     variable = rownames(coef2), 
-                     lambda = rep(object$control$lambda2, each = nrow(coef2)))
+                     vari = rownames(coef2), 
+                     lam = rep(x$control$lambda2, each = nrow(coef2)))
     if (nrow(d1) > 0) {
       coef10 <- t(ifelse(coef1 < 1e-3, 0, coef1))
-      if (call_args(object$call)$lambda1 == "auto") {
+      if (call_args(x$call)$lambda1 == "auto") {
         keep1 <- !duplicated(coef10)
-        d1 <- subset(d1, lambda %in% object$control$lambda1[keep1])
+        d1 <- subset(d1, lam %in% x$control$lambda1[keep1])
       }
-      xint <- unique(d1$lambda[d1$lambda == object$fit1$lambda1.min])
-      if (call_args(object$call)$lambda1 == "auto") {
-        d1$lambda <- log(d1$lambda)
+      xint <- unique(d1$lam[d1$lam == x$fit1$lambda1.min])
+      if (call_args(x$call)$lambda1 == "auto") {
+        d1$lam <- log(d1$lam)
         xlab <- expression(log(lambda))
         xint <- log(xint)
       } else
         xlab <- expression(lambda)
-      title <- ifelse(object$control$model == "mixture", "Incidence component", "Long-term effect")
-      p1 <- ggplot(d1, aes(x = lambda, y = coef, color = variable)) +
+      title <- ifelse(x$control$model == "mixture", "Incidence component", "Long-term effect")
+      p1 <- ggplot(d1, aes(x = lam, y = coef, color = vari)) +
         geom_line() + scale_x_reverse() +
         geom_vline(xintercept = xint, linetype="dotted") + 
         ylab("Coefficients") + ggtitle(title) + xlab(xlab)
     }
     if (nrow(d2) > 0) {
       coef20 <- t(ifelse(coef2 < 1e-3, 0, coef2))
-      if (call_args(object$call)$lambda2 == "auto") {
+      if (call_args(x$call)$lambda2 == "auto") {
         keep2 <- !duplicated(coef20)
-        d2 <- subset(d2, lambda %in% object$control$lambda2[keep2])
+        d2 <- subset(d2, lam %in% x$control$lambda2[keep2])
       }
-      xint <- unique(d2$lambda[d2$lambda == object$fit2$lambda2.min])
-      if (call_args(object$call)$lambda2 == "auto") {
-        d2$lambda <- log(d2$lambda)
+      xint <- unique(d2$lam[d2$lam == x$fit2$lambda2.min])
+      if (call_args(x$call)$lambda2 == "auto") {
+        d2$lam <- log(d2$lam)
         xlab <- expression(log(lambda))
         xint <- log(xint)
       } else
         xlab <- expression(lambda)
-      title <- ifelse(object$control$model == "mixture", "Latency component", "Short-term effect")      
-      p2 <- ggplot(d2, aes(x = lambda, y = coef, color = variable)) +
+      title <- ifelse(x$control$model == "mixture", "Latency component", "Short-term effect")      
+      p2 <- ggplot(d2, aes(x = lam, y = coef, color = vari)) +
         geom_line() + scale_x_reverse() +
         geom_vline(xintercept = xint, linetype="dotted") + 
         ylab("Coefficients") + ggtitle(title) + xlab(xlab)

@@ -3,6 +3,7 @@
 ^\.Rproj\.user$
 ^\.Rhistory$
 ^\.git$
+^\.github$
 ^appveyor\.yml$
 ^\.travis\.yml$
 ^inst$

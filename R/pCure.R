@@ -41,8 +41,8 @@
 #' Analysis of survival data with cure fraction and variable selection: A pseudo-observations approach
 #' \emph{Statistical Methods in Medical Research}, \bold{31}(11): 2037--2053.
 #' 
-#' @importFrom stats model.frame model.matrix model.extract 
-#' @importFrom stats .getXlevels formula pnorm quantile runif sd symnum
+#' @importFrom stats model.frame model.matrix model.extract as.formula
+#' @importFrom stats .getXlevels formula pnorm quantile runif sd symnum coef
 #'
 #' @example inst/examples/ex_pCure.R
 #' @export

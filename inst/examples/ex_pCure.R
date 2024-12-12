@@ -1,12 +1,27 @@
-## A melanoma data example
-data(e1684, package = "smcure")
-e1684 <- na.omit(e1684)
+## Function to generate simulated data under the PHMC model
+simMC <- function(n) {
+  p <- 10
+  a <- c(1, 0, -1, 0, 0, 0, 0, 0, 0, 0) # incidence coefs.
+  b <- c(-1, 0, 1, 0, 0, 0, 0, 0, 0, 0) # latency coefs.
+  X <- data.frame(x = matrix(runif(n * p), n))
+  X$x.3 <- 1 * (X$x.3 > .5)
+  X$x.4 <- 1 * (X$x.4 > .5)
+  X[,5:10] <- apply(X[,5:10], 2, qnorm)  
+  time <- -3 * exp(-colSums(b * t(X))) * log(runif(n))
+  cure.prob <- 1 / (1 + exp(-2 - colSums(a * t(X))))
+  Y <- rbinom(n, 1, cure.prob) 
+  cen <- rexp(n, .02)
+  dat <- NULL  
+  dat$Time <- pmin(time / Y, cen)
+  dat$Status <- 1 * (dat$Time == time)
+  data.frame(dat, X)
+}
 
-## Define formula & fix random seed 
-fn <- ~ AGE + TRT * SEX; set.seed(123)
+## Fix seed and generate data
+set.seed(1); datMC <- simMC(1000)
 
-## Unpenalized PHMC model (~ 0.046s)
-summary(fit1 <- pCure(fn, fn, FAILTIME, FAILCENS, e1684))
+## Oracle model with an unpenalized PHMC model
+summary(fit1 <- pCure(~ x.1 + x.3, ~ x.1 + x.3, Time, Status, datMC))
 
 ## Penalized PHMC model with tuning parameters selected by 10-fold cross validation
 ## User specifies the range of tuning parameters

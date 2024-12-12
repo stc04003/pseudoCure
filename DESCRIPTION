@@ -17,4 +17,4 @@ RoxygenNote: 7.3.2
 NeedsCompilation: yes
 Packaged: 2024-08-11 10:41:11 UTC; schiou
 Encoding: UTF-8
-Imports: Rcpp, MASS
+Imports: Rcpp, MASS, ggplot2, ggpubr, rlang
