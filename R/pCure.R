@@ -112,7 +112,7 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     if (is.null.missing(formula1)) {   
       mm1 <- NULL
       mm2 <- stats::model.matrix(formula2, data = mf)
-      mm2 <- mm2[, colnames(mm2) != "(Intercept)"]   
+      mm2 <- mm2[, colnames(mm2) != "(Intercept)", drop = FALSE]   
     } else {
       mm1 <- mm2 <- stats::model.matrix(formula1, data = mf)
       if (is.null.missing(formula2)) mm2 <- NULL
@@ -126,12 +126,12 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
       mf <- eval(mf, parent.frame())
       xlevel2 <- .getXlevels(attr(mf, "terms"), mf)
       mm2 <- stats::model.matrix(formula2, data = mf)
-      mm2 <- mm2[, colnames(mm2) != "(Intercept)"]   
+      mm2 <- mm2[, colnames(mm2) != "(Intercept)", drop = FALSE]
     }
     if (!is.null.missing(formula1) && formula1 == as.formula("~."))
-      mm1 <- mm1[, !(colnames(mm1) %in% c(fExcl, "`(time)`", "`(status)`"))]
+      mm1 <- mm1[, !(colnames(mm1) %in% c(fExcl, "`(time)`", "`(status)`")), drop = FALSE]
     if (!is.null.missing(formula2) && formula2 == as.formula("~."))
-      mm2 <- mm2[, !(colnames(mm2) %in% c(fExcl, "`(time)`", "`(status)`"))]
+      mm2 <- mm2[, !(colnames(mm2) %in% c(fExcl, "`(time)`", "`(status)`")), drop = FALSE]
     tmax <- max(time[status > 0])
     if (missing(t0)) t0 <- quantile(time[status > 0], c(1:9 / 10, .95))
     ## auto choose lambda; still under development
