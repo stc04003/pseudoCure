@@ -128,9 +128,10 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
       mm2 <- stats::model.matrix(formula2, data = mf)
       mm2 <- mm2[, colnames(mm2) != "(Intercept)", drop = FALSE]
     }
-    if (!is.null.missing(formula1) && formula1 == as.formula("~."))
+    if (!is.null.missing(formula1) && any(grepl("\\. ", as.character(formula1))))
       mm1 <- mm1[, !(colnames(mm1) %in% c(fExcl, "`(time)`", "`(status)`")), drop = FALSE]
-    if (!is.null.missing(formula2) && formula2 == as.formula("~."))
+    if (!is.null.missing(formula2) && any(grepl("\\. ", as.character(formula2))))
+        ## formula2 == as.formula("~."))
       mm2 <- mm2[, !(colnames(mm2) %in% c(fExcl, "`(time)`", "`(status)`")), drop = FALSE]
     tmax <- max(time[status > 0])
     if (missing(t0)) t0 <- quantile(time[status > 0], c(1:9 / 10, .95))
