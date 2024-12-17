@@ -169,7 +169,7 @@ utils::globalVariables(c("vari", "lam"))
 #' @param ... Other arguments for future extension.
 #' 
 #' @importFrom ggplot2 ggplot geom_point geom_line  geom_errorbar ggtitle scale_x_reverse geom_vline
-#' @importFrom ggplot2 xlab ylab aes 
+#' @importFrom ggplot2 xlab ylab aes aes_string
 #' @importFrom rlang call_args
 #' @importFrom ggpubr ggarrange
 #'
@@ -190,7 +190,7 @@ plot.pCure <- function(x, part = "both", type = c("residuals", "cv", "trace"),..
     if (length(unique(dat$Comp)) == 1)
       p <- ggplot(dat, aes(x = fitted,y = resid))
     else 
-      p <- ggplot(dat, aes(x = fitted,y = resid, color = dat$Comp))
+      p <- ggplot(dat, aes_string(x = "fitted", y = "resid", color = "Comp"))
     p <- p + geom_point() + xlab("Fitted values") + ylab("Residuals")
   }
   else {
