@@ -21,6 +21,10 @@ pseudoKM1 <- function(Time, censor, Q) {
     .Call(`_pseudoCure_pseudoKM1`, Time, censor, Q)
 }
 
+fastKM <- function(Time, censor) {
+    .Call(`_pseudoCure_fastKM`, Time, censor)
+}
+
 #' @noRd
 fastDabrowska <- function(tx, ty, x, y, dx, dy, L) {
     .Call(`_pseudoCure_fastDabrowska`, tx, ty, x, y, dx, dy, L)

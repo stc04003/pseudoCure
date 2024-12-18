@@ -5,14 +5,7 @@
 \alias{Teeth500}
 \title{Dental data for illustration}
 \format{
-A data frame with 500 observations and 26 variables.
-}
-\usage{
-data(Teeth500)
-}
-\description{
-A data on the survival of teeth with many predictors
-The variables are as follows:
+A data frame containing the following variables:
 \describe{
   \item{time}{tooth survival time subject to right censoring.}
   \item{event}{Tooth loss status: 1 = lost, 0 = not lost.}
@@ -30,17 +23,25 @@ The variables are as follows:
   \item{endo}{Endodontic therapy indicator; TRUE = endo therapy performed, FALSE = no endo therapy.}
   \item{filled_tooth}{Filled tooth indicator; TRUE = filled, FALSE = not filled.}
   \item{decayed_tooth}{Decayed tooth indicator; TRUE = decayed, FALSE = not decayed.}
-  \item{filled_ave}{Mean number of filled surfaces.}
-  \item{decay_new_ave}{Mean number of new decayed surfaces.}
-  \item{decay_recur_ave}{Mean number of recurrent decayed surfaces.}
-  \item{filled_tooth_ave}{Percentage of filled teeth.}
-  \item{decayed_tooth_ave}{Percentage of decayed teeth.}
-  \item{missing_tooth_ave}{Percentage of missing teeth.}
+  \item{filled_pct}{Mean number of filled surfaces.}
+  \item{decay_new_pct}{Mean number of new decayed surfaces.}
+  \item{decay_recur_pct}{Mean number of recurrent decayed surfaces.}
+  \item{filled_tooth_pct}{Percentage of filled teeth.}
+  \item{decayed_tooth_pct}{Percentage of decayed teeth.}
+  \item{missing_tooth_pct}{Percentage of missing teeth.}
   \item{total_tooth}{Total number of teeth.}
   \item{gender}{Gender; Female vs Male.}
   \item{diabetes}{Diabetes indicator; TRUE = diabetes, FALSE = no diabetes.}
   \item{tobacco_ever}{Tobacco use indicator; TRUE = had tobacco use, FALSE = never had tobacco use.}
 }
+
+A data frame with 500 observations and 26 variables.
+}
+\usage{
+data(Teeth500)
+}
+\description{
+Data on the survival of teeth with many predictors
 }
 \details{
 The data is a subset of the original dataset included in the \code{MST} package

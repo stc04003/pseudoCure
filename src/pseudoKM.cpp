@@ -91,3 +91,24 @@ arma::mat pseudoKM1(arma::vec Time,
   out.col(N) = S(ind1);
   return(out);
 }
+
+// Give KM estimates - equivalent to survfit(...)$surv 
+// [[Rcpp::export(rng = false)]]
+arma::mat fastKM(arma::vec Time,
+		 arma::vec censor) {
+  arma::vec T0 = arma::sort(arma::unique(Time));
+  int n = T0.n_elem;
+  int N = Time.n_elem;
+  arma::vec d(n, arma::fill::zeros);
+  arma::vec r(n, arma::fill::zeros); 
+  // calculate d and r
+  for (int i = 0; i < n; i++) {
+    arma::uvec ind1 = find(Time == T0[i]);
+    d[i] = sum(censor.elem(ind1));
+    r(span(0, i)) += ind1.n_elem;
+  }
+  arma::mat outM(n, 2, arma::fill::ones); 
+  outM.col(0) = T0;
+  outM.col(1) = cumprod(1 - d / r);
+  return(outM);
+}
