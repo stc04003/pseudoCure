@@ -332,8 +332,8 @@ arma::mat pgeeCV(arma::vec y,
       if (glmlink == "cloglog") links = cloglogLink(eta);
       if (glmlink == "logit") links = logitLink(eta);
       arma::vec mu = links(0);
-      arma::vec devResids = yTest - mu;
-      out(i, j) = mean(devResids % devResids);
+      arma::vec devResids = yTest - mu;    
+      out(i, j) = mean(devResids % devResids); // transform to original scale? 
     }
   }
   // out(0) = mean(cvm);

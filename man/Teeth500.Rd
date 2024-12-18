@@ -14,32 +14,32 @@ data(Teeth500)
 A data on the survival of teeth with many predictors
 The variables are as follows:
 \describe{
-  \item{time}{tooth survival time subject to right censoring}
-  \item{event}{Tooth loss status: 1 = lost, 0 = not lost}
-  \item{molar}{Indicates whether the tooth is a molar (logical).}
-  \item{mobil}{Mobility score (on a scale 0-5)}
-  \item{bleed}{Bleeding on probing (percentage)}
-  \item{plaque}{Plaque score (percentage)}
-  \item{pocket}{Periodontal probing depth (tooth-level mean, in mm)}
-  \item{cal}{Clinical attachment level (tooth-level mean, in mm)}
-  \item{fgm}{Free gingival margin (tooth-level mean, in mm)}
-  \item{filled}{Number of filled surfaces on the tooth}
-  \item{decay_new}{Number of newly decayed surfaces}
-  \item{decay_recur}{Number of recurrently decayed surfaces}
-  \item{crown}{Indicates whether the tooth has a crown (factor)}
-  \item{endo}{Indicates whether the tooth has undergone endodontic therapy (factor)}
-  \item{filled_tooth}{Indicates whether the tooth is filled (factor)}
-  \item{decayed_tooth}{Indicates whether the tooth is decayed (factor)}
-  \item{filled_sum}{Total number of filled surfaces across all teeth}
-  \item{decay_new_sum}{Total number of newly decayed surfaces across all teeth}
-  \item{decay_recur_sum}{Total number of recurrently decayed surfaces across all teeth}
-  \item{filled_tooth_sum}{Total number of filled teeth}
-  \item{decayed_tooth_sum}{Total number of decayed teeth}
-  \item{missing_tooth_sum}{Total number of missing teeth}
-  \item{total_tooth}{Total number of teeth}
-  \item{gender}{Gender of the patient (factor)}
-  \item{diabetes}{Indicates whether the patient has diabetes mellitus (factor)}
-  \item{tobacco_ever}{Indicates whether the patient has a history of tobacco use (factor)}
+  \item{time}{tooth survival time subject to right censoring.}
+  \item{event}{Tooth loss status: 1 = lost, 0 = not lost.}
+  \item{molar}{Molar indicator; TRUE = molar tooth, FALSE = non-molar tooth.}
+  \item{mobil}{Mobility score, on a scale from 0 to 5.}
+  \item{bleed}{Bleeding on probing, expressed as a percentage.}
+  \item{plaque}{Plaque score, expressed as a percentage.}
+  \item{pocket}{Periodontal probing depth (tooth-level mean).}
+  \item{cal}{Clinical Attachment Level (tooth-level mean).}
+  \item{fgm}{Free Gingival Margin (tooth-level mean).}
+  \item{filled}{Number of filled surfaces.}
+  \item{decay_new}{New decayed surfaces.}
+  \item{decay_recur}{Recurrent decayed surfaces.}
+  \item{crown}{Crown indicator; TRUE = tooth has a crown, FALSE = no crown.}
+  \item{endo}{Endodontic therapy indicator; TRUE = endo therapy performed, FALSE = no endo therapy.}
+  \item{filled_tooth}{Filled tooth indicator; TRUE = filled, FALSE = not filled.}
+  \item{decayed_tooth}{Decayed tooth indicator; TRUE = decayed, FALSE = not decayed.}
+  \item{filled_ave}{Mean number of filled surfaces.}
+  \item{decay_new_ave}{Mean number of new decayed surfaces.}
+  \item{decay_recur_ave}{Mean number of recurrent decayed surfaces.}
+  \item{filled_tooth_ave}{Percentage of filled teeth.}
+  \item{decayed_tooth_ave}{Percentage of decayed teeth.}
+  \item{missing_tooth_ave}{Percentage of missing teeth.}
+  \item{total_tooth}{Total number of teeth.}
+  \item{gender}{Gender; Female vs Male.}
+  \item{diabetes}{Diabetes indicator; TRUE = diabetes, FALSE = no diabetes.}
+  \item{tobacco_ever}{Tobacco use indicator; TRUE = had tobacco use, FALSE = never had tobacco use.}
 }
 }
 \details{
