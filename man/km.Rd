@@ -17,3 +17,7 @@ This function exclusively returns the Kaplan-Meier survival estimate and the cor
 It does not provide standard errors or any additional outputs
 that are typically included with the \code{survfit()} function.
 }
+\examples{
+data(Teeth500)
+km(Teeth500$time, Teeth500$event)
+}

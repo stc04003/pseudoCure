@@ -112,3 +112,19 @@ arma::mat fastKM(arma::vec Time,
   outM.col(1) = cumprod(1 - d / r);
   return(outM);
 }
+
+// Performs the Maller-Zhou test
+// [[Rcpp::export(rng = false)]]
+Rcpp::List testMZ(arma::vec Time,
+		  arma::vec censor) {
+  int n = Time.n_elem;
+  double T1 = max(Time);
+  double T2 = max(Time.elem(find(censor > 0)));
+  double l = 2 * T2 - T1;
+  if (l < 0) l = 0; 
+  int nint = accu((Time >= l) && (Time <= T2)); 
+  Rcpp::List out(2);
+  out(0) = nint; 
+  out(1) = pow(1 - (double) nint / n, n); 
+  return(out);
+}

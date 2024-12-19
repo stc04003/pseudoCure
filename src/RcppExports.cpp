@@ -106,6 +106,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// testMZ
+Rcpp::List testMZ(arma::vec Time, arma::vec censor);
+RcppExport SEXP _pseudoCure_testMZ(SEXP TimeSEXP, SEXP censorSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type Time(TimeSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type censor(censorSEXP);
+    rcpp_result_gen = Rcpp::wrap(testMZ(Time, censor));
+    return rcpp_result_gen;
+END_RCPP
+}
 // fastDabrowska
 double fastDabrowska(double tx, double ty, arma::vec x, arma::vec y, arma::vec dx, arma::vec dy, arma::mat L);
 RcppExport SEXP _pseudoCure_fastDabrowska(SEXP txSEXP, SEXP tySEXP, SEXP xSEXP, SEXP ySEXP, SEXP dxSEXP, SEXP dySEXP, SEXP LSEXP) {
