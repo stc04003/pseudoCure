@@ -6,7 +6,7 @@
 #' \describe{
 #'   \item{time}{tooth survival time subject to right censoring.}
 #'   \item{event}{Tooth loss status: 1 = lost, 0 = not lost.}
-#'   \item{molar}{Molar indicator; TRUE = molar tooth, FALSE = non-molar tooth.}
+#'   \item{molar}{Molar indicator; 1 = molar tooth, 0 = non-molar tooth.}
 #'   \item{mobil}{Mobility score, on a scale from 0 to 5.}
 #'   \item{bleed}{Bleeding on probing, expressed as a percentage.}
 #'   \item{plaque}{Plaque score, expressed as a percentage.}
@@ -16,10 +16,10 @@
 #'   \item{filled}{Number of filled surfaces.}
 #'   \item{decay_new}{New decayed surfaces.}
 #'   \item{decay_recur}{Recurrent decayed surfaces.}
-#'   \item{crown}{Crown indicator; TRUE = tooth has a crown, FALSE = no crown.}
-#'   \item{endo}{Endodontic therapy indicator; TRUE = endo therapy performed, FALSE = no endo therapy.}
-#'   \item{filled_tooth}{Filled tooth indicator; TRUE = filled, FALSE = not filled.}
-#'   \item{decayed_tooth}{Decayed tooth indicator; TRUE = decayed, FALSE = not decayed.}
+#'   \item{crown}{Crown indicator; 1 = tooth has a crown, 0 = no crown.}
+#'   \item{endo}{Endodontic therapy indicator; 1 = endo therapy performed, 0 = no endo therapy.}
+#'   \item{filled_tooth}{Filled tooth indicator; 1 = filled, 0 = not filled.}
+#'   \item{decayed_tooth}{Decayed tooth indicator; 1 = decayed, 0 = not decayed.}
 #'   \item{filled_pct}{Mean number of filled surfaces.}
 #'   \item{decay_new_pct}{Mean number of new decayed surfaces.}
 #'   \item{decay_recur_pct}{Mean number of recurrent decayed surfaces.}
@@ -27,9 +27,9 @@
 #'   \item{decayed_tooth_pct}{Percentage of decayed teeth.}
 #'   \item{missing_tooth_pct}{Percentage of missing teeth.}
 #'   \item{total_tooth}{Total number of teeth.}
-#'   \item{gender}{Gender; Female vs Male.}
-#'   \item{diabetes}{Diabetes indicator; TRUE = diabetes, FALSE = no diabetes.}
-#'   \item{tobacco_ever}{Tobacco use indicator; TRUE = had tobacco use, FALSE = never had tobacco use.}
+#'   \item{gender}{Gender; 1 = male, 0 = female}
+#'   \item{diabetes}{Diabetes indicator; 1 = diabetes, 0 = no diabetes.}
+#'   \item{tobacco_ever}{Tobacco use indicator; 1 = had tobacco use, 0 = never had tobacco use.}
 #' }
 #'
 #' @details

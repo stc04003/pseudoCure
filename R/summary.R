@@ -31,7 +31,7 @@ print.pCure <- function(x, cutoff = 1e-3, ...) {
 }
 
 #' @exportS3Method summary pCure
-summary.pCure <- function(object, cutoff = 1e-3,...) {
+summary.pCure <- function(object, cutoff = 1e-3, digits = max(3L, getOption("digits") - 2L), ...) {
   if (!is.pCure(object)) stop("Must be a pCure object")
   out <- list(call = object$call, model = object$model, control = object$control)
   cutoff1 <- cutoff2 <- cutoff
@@ -46,6 +46,7 @@ summary.pCure <- function(object, cutoff = 1e-3,...) {
   out$lambda2.min <- object$fit2$lambda2.min
   out$lambda1.1se <- object$fit1$lambda1.1se
   out$lambda2.1se <- object$fit2$lambda2.1se
+  out$digits <- digits
   class(out) <- "summary.pCure"
   return(out)
 }
@@ -64,27 +65,27 @@ print.summary.pCure <- function(x, ...) {
   dput(x$call)
   if (all(is.null(x$control$lambda1), is.null(x$control$lambda2))) {
     if (x$control$model == "mixture")
-      cat("\nFitted with the mixture cure model")
+      cat("\n\nFitted with the mixture cure model")
     if (x$control$model == "promotion")
-      cat("\nFitted with the promotion time model")
+      cat("\n\nFitted with the promotion time model")
   } else {
     if (x$control$model == "mixture")
-      cat("\nFitted with the penalized mixture cure model")
+      cat("\n\nFitted with the penalized mixture cure model")
     if (x$control$model == "promotion")
-      cat("\nFitted with the penalized promotion time model")
+      cat("\n\nFitted with the penalized promotion time model")
   }
   if (x$control$model == "mixture") cat("\nIncidence component:\n")
   else cat("\nLong-term effect:\n")
   if (!is.null(x$lambda1.min))
     cat("Tuning parameters selected by minimum prediction error:", x$lambda1.min, "\n\n")
   ## cat("\nTuning parameters selected by 1se rule: ", x$lambda1.1se, "\n\n")
-  printCoefmat2(x$tab1, exclude = x$exclude1)
+  printCoefmat2(x$tab1, exclude = x$exclude1, digits = x$digits)
   if (x$control$model == "mixture") cat("\nLatency component:\n")
   else cat("\nShort-term effect:\n")
   if (!is.null(x$lambda2.min))
     cat("Tuning parameters selected by minimum prediction error:", x$lambda2.min, "\n\n")
   ## cat("\nTuning parameters selected by 1se rule: ", x$lambda2.1se, "\n\n")
-  printCoefmat2(x$tab2, exclude = x$exclude2)
+  printCoefmat2(x$tab2, exclude = x$exclude2, digits = x$digits)
   cat("\n")
 }
 
