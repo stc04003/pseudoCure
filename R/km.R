@@ -29,7 +29,7 @@ print.pKM <- function(x, ...) {
   n <- length(x[[1]])
   qs <- x$time[n - findInterval(1:3 / 4, rev(x$surv)) + 1]
   print(data.frame(n = n, events = attr(x, "events"),
-                   Q1 = qs[3], median = qs[2], Q3 = qs[1]), row.names = FALSE)
+                   Q1 = qs[1], median = qs[2], Q3 = qs[3]), row.names = FALSE)
 }
 
 #' @exportS3Method plot pKM
@@ -48,8 +48,6 @@ quantile.pKM <- function(x, probs = c(0.25, 0.5, 0.75), ...) {
   names(d) <- paste0(100 * probs, "%")  
   print(d, row.names = F)
 }
-
-
 
 
 #' Maller-Zhou test
