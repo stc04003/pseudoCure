@@ -13,9 +13,9 @@ A data frame containing the following variables:
   \item{mobil}{Mobility score, on a scale from 0 to 5.}
   \item{bleed}{Bleeding on probing, expressed as a percentage.}
   \item{plaque}{Plaque score, expressed as a percentage.}
-  \item{pocket}{Periodontal probing depth (tooth-level mean).}
-  \item{cal}{Clinical Attachment Level (tooth-level mean).}
-  \item{fgm}{Free Gingival Margin (tooth-level mean).}
+  \item{pocket}{Periodontal probing depth.}
+  \item{cal}{Clinical Attachment Level.}
+  \item{fgm}{Free Gingival Margin.}
   \item{filled}{Number of filled surfaces.}
   \item{decay_new}{New decayed surfaces.}
   \item{decay_recur}{Recurrent decayed surfaces.}

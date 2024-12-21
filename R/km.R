@@ -8,6 +8,7 @@
 #' @param status A numeric vector for the event indicator;
 #' 0 indicates right-censoring and 1 indicates events.
 #'
+#' @importFrom ggplot2 geom_step
 #' @example inst/examples/ex_km.R
 #' @export
 km <- function(time, status) {
