@@ -10,9 +10,9 @@
 #'   \item{mobil}{Mobility score, on a scale from 0 to 5.}
 #'   \item{bleed}{Bleeding on probing, expressed as a percentage.}
 #'   \item{plaque}{Plaque score, expressed as a percentage.}
-#'   \item{pocket}{Periodontal probing depth (tooth-level mean).}
-#'   \item{cal}{Clinical Attachment Level (tooth-level mean).}
-#'   \item{fgm}{Free Gingival Margin (tooth-level mean).}
+#'   \item{pocket}{Periodontal probing depth.}
+#'   \item{cal}{Clinical Attachment Level.}
+#'   \item{fgm}{Free Gingival Margin.}
 #'   \item{filled}{Number of filled surfaces.}
 #'   \item{decay_new}{New decayed surfaces.}
 #'   \item{decay_recur}{Recurrent decayed surfaces.}
@@ -20,12 +20,6 @@
 #'   \item{endo}{Endodontic therapy indicator; 1 = endo therapy performed, 0 = no endo therapy.}
 #'   \item{filled_tooth}{Filled tooth indicator; 1 = filled, 0 = not filled.}
 #'   \item{decayed_tooth}{Decayed tooth indicator; 1 = decayed, 0 = not decayed.}
-#'   \item{filled_pct}{Mean number of filled surfaces.}
-#'   \item{decay_new_pct}{Mean number of new decayed surfaces.}
-#'   \item{decay_recur_pct}{Mean number of recurrent decayed surfaces.}
-#'   \item{filled_tooth_pct}{Percentage of filled teeth.}
-#'   \item{decayed_tooth_pct}{Percentage of decayed teeth.}
-#'   \item{missing_tooth_pct}{Percentage of missing teeth.}
 #'   \item{total_tooth}{Total number of teeth.}
 #'   \item{gender}{Gender; 1 = male, 0 = female}
 #'   \item{diabetes}{Diabetes indicator; 1 = diabetes, 0 = no diabetes.}
@@ -41,7 +35,7 @@
 #' @docType data
 #' @name Teeth500
 #' @rdname Teeth500
-#' @format A data frame with 500 observations and 26 variables.
+#' @format A data frame with 500 observations and 20 variables.
 #'
 #' @references
 #' Calhoun, Peter and Su, Xiaogang and Nunn, Martha and Fan, Juanjuan (2018) Constructing Multivariate Survival Trees: The MST Package for R. \emph{Journal of Statistical Software}, \bold{83}(12).

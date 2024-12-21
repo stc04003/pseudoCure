@@ -23,7 +23,7 @@ fitPHPH1 <- function(X1, time, status, control,
   }
   thetai <- n * (-log(cure)) - (n - 1) * (-log(curei))
   if (is.null(control$binit1)) control$binit1 <- rep(0, ncol(X1))
-  if (is.null(control$exclude1)) control$exclude1 <- rep(0, ncol(X1))
+  if (is.null(control$exclude1)) control$exclude1 <- 1 * (colnames(X1) == "(Intercept)")
   fit1 <- gee(thetai, X1, control$binit1, rep(1, n), "log", "ind", control$tol, control$maxit)  
   if (!is.null(control$lambda1)) {
     control$binit1 <- fit1$b
@@ -75,7 +75,8 @@ fitPHPH2 <- function(X2, time, status, t0, control,
   colnames(X22) <- c(paste("t", seq_along(t0), sep = ""), colnames(X2))
   if (is.null(control$binit2)) control$binit2 <- runif(ncol(X22), -.001, .001)
   ## control$binit2 <- rep(0, ncol(X22))
-  if (is.null(control$exclude2)) control$exclude2 <- rep(0, ncol(X22))
+  if (is.null(control$exclude2)) control$exclude2 <- rep(1:0, c(length(t0), ncol(X22) - length(t0)))
+  else control$exclude2 <- c(rep(0, length(t0)), control$exclude2)
   fit2 <- gee(Fi, X22, control$binit2, nt, "cloglog",
               control$corstr, control$tol, control$maxit)
   if (!is.null(control$lambda2)) {

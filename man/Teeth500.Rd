@@ -23,19 +23,13 @@ A data frame containing the following variables:
   \item{endo}{Endodontic therapy indicator; 1 = endo therapy performed, 0 = no endo therapy.}
   \item{filled_tooth}{Filled tooth indicator; 1 = filled, 0 = not filled.}
   \item{decayed_tooth}{Decayed tooth indicator; 1 = decayed, 0 = not decayed.}
-  \item{filled_pct}{Mean number of filled surfaces.}
-  \item{decay_new_pct}{Mean number of new decayed surfaces.}
-  \item{decay_recur_pct}{Mean number of recurrent decayed surfaces.}
-  \item{filled_tooth_pct}{Percentage of filled teeth.}
-  \item{decayed_tooth_pct}{Percentage of decayed teeth.}
-  \item{missing_tooth_pct}{Percentage of missing teeth.}
   \item{total_tooth}{Total number of teeth.}
   \item{gender}{Gender; 1 = male, 0 = female}
   \item{diabetes}{Diabetes indicator; 1 = diabetes, 0 = no diabetes.}
   \item{tobacco_ever}{Tobacco use indicator; 1 = had tobacco use, 0 = never had tobacco use.}
 }
 
-A data frame with 500 observations and 26 variables.
+A data frame with 500 observations and 20 variables.
 }
 \usage{
 data(Teeth500)

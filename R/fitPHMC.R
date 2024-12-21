@@ -23,9 +23,9 @@ fitPHMC1 <- function(X1, time, status, control,
   }
   thetai <- n * (1 - cure) - (n - 1) * (1 - curei)
   if (is.null(control$binit1)) control$binit1 <- rep(0, ncol(X1))
-  if (is.null(control$exclude1)) control$exclude1 <- rep(0, ncol(X1))  
-  ## if (is.null(control$lambda1))
-  fit1 <- gee(thetai, X1, control$binit1, rep(1, n), "logit", "ind", control$tol, control$maxit)
+  if (is.null(control$exclude1)) control$exclude1 <- 1 * (colnames(X1) == "(Intercept)")
+  ## control$exclude1 <- rep(0, ncol(X1))  
+      fit1 <- gee(thetai, X1, control$binit1, rep(1, n), "logit", "ind", control$tol, control$maxit)
   if (!is.null(control$lambda1)) {
     control$binit1 <- fit1$b
     fit1 <- NULL
@@ -76,7 +76,9 @@ fitPHMC2 <- function(X2, time, status, t0, control,
                X2[rep(1:nrow(X2), each = length(t0)),])
   colnames(X22) <- c(paste("t", seq_along(t0), sep = ""), colnames(X2))
   if (is.null(control$binit2)) control$binit2 <- rep(0, ncol(X22))
-  if (is.null(control$exclude2)) control$exclude2 <- rep(0, ncol(X22))
+  if (is.null(control$exclude2)) control$exclude2 <- rep(1:0, c(length(t0), ncol(X22) - length(t0)))
+  else control$exclude2 <- c(rep(0, length(t0)), control$exclude2)
+    ## control$exclude2 <- rep(0, ncol(X22))
   fit2 <- gee(Fi, X22, control$binit2, nt, "cloglog",
               control$corstr, control$tol, control$maxit)
   if (!is.null(control$lambda2)) {

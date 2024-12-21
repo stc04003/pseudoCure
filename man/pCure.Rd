@@ -61,9 +61,9 @@ specified in the formulas.
 Alternatively, this can be specified as a vector numeric vector of non-negative values
 or "auto" for auto selection.}
 
-\item{exclude1, exclude2}{A binary numerical vector specifying which variables to exclude in variable selection.
-The length of \code{exclude} must match with the number of covariates.
-A value of 1 means to exclude in the variable selection.}
+\item{exclude1, exclude2}{A character string specifying which variables to exclude from variable selection.
+Variables matching elements in this string will not be penalized during the variable selection process.
+in variable selection.}
 
 \item{penalty1, penalty2}{A character string specifying the penalty function.
 The available options are \code{"lasso"} and \code{"scad"}.}

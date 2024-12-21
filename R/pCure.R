@@ -30,9 +30,9 @@
 #' or "auto" for auto selection.
 #' @param penalty1,penalty2 A character string specifying the penalty function.
 #' The available options are \code{"lasso"} and \code{"scad"}.
-#' @param exclude1,exclude2 A binary numerical vector specifying which variables to exclude in variable selection.
-#' The length of \code{exclude} must match with the number of covariates.
-#' A value of 1 means to exclude in the variable selection.
+#' @param exclude1,exclude2 A character string specifying which variables to exclude from variable selection.
+#' Variables matching elements in this string will not be penalized during the variable selection process.
+#' in variable selection.
 #' @param nfolds An optional integer value specifying the number of folds.
 #' The default value is 5. 
 #' @param control A list of control parameters. See detail.
@@ -86,8 +86,6 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     ctrl$lambda2 <- lambda2
     ctrl$penalty1 <- penalty1
     ctrl$penalty2 <- penalty2
-    ctrl$exclude1 <- exclude1
-    ctrl$exclude2 <- exclude2
     ctrl$nfolds <- nfolds
     if (is.null.missing(formula1)) ctrl$formula1 <- NULL
     else ctrl$formula1 <- formula1
@@ -109,12 +107,18 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
     xlevel1 <- xlevel2 <- .getXlevels(attr(mf, "terms"), mf)
     time <- as.numeric(model.extract(mf, time))
     status <- as.numeric(model.extract(mf, status))
+
+    varInfo <- NULL # to prepare exclude
     if (is.null.missing(formula1)) {   
       mm1 <- NULL
       mm2 <- stats::model.matrix(formula2, data = mf)
+      varInfo$var2 <- attr(terms(formula2, data = mf), "term.labels")
+      varInfo$assign2 <- attr(mm2, "assign")
       mm2 <- mm2[, colnames(mm2) != "(Intercept)", drop = FALSE]   
     } else {
       mm1 <- mm2 <- stats::model.matrix(formula1, data = mf)
+      varInfo$var1 <- varInfo$var2 <- attr(terms(formula1, data = mf), "term.labels")
+      varInfo$assign1 <- varInfo$assign2 <- attr(mm1, "assign")
       if (is.null.missing(formula2)) mm2 <- NULL
     }
     if (!is.null.missing(formula1) && !is.null.missing(formula2)) {
@@ -126,14 +130,36 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
       mf <- eval(mf, parent.frame())
       xlevel2 <- .getXlevels(attr(mf, "terms"), mf)
       mm2 <- stats::model.matrix(formula2, data = mf)
+      varInfo$var2 <- attr(terms(formula2, data = mf), "term.labels")
+      varInfo$assign2 <- attr(mm2, "assign")
+      varInfo$assign2 <- varInfo$assign2[colnames(mm2) != "(Intercept)"]
       mm2 <- mm2[, colnames(mm2) != "(Intercept)", drop = FALSE]
     }
+
+    ## remove cluster of excluded variables
+    exclude1 <- 1 * (varInfo$assign1 %in% match(exclude1, varInfo$var1))
+    exclude2 <- 1 * (varInfo$assign2 %in% match(exclude2, varInfo$var2))
+    
+    # exclude2[names(mm2) == "(Intercept)"] <- 1
+    
     if (!is.null.missing(formula1) &&
-        (any(grepl("\\. ", as.character(formula1))) | formula1 == as.formula("~.")))
-      mm1 <- mm1[, !(colnames(mm1) %in% c(fExcl, "`(time)`", "`(status)`")), drop = FALSE]
+        (any(grepl("\\. ", as.character(formula1))) | formula1 == as.formula("~."))) {
+      kick <- colnames(mm1) %in% c(fExcl, "`(time)`", "`(status)`")
+      exclude1 <- exclude1[!kick]
+      mm1 <- mm1[, !kick, drop = FALSE]
+      exclude1[colnames(mm1) == "(Intercept)"] <- 1
+    }
     if (!is.null.missing(formula2) &&
-        (any(grepl("\\. ", as.character(formula2))) | formula2 == as.formula("~.")))
-      mm2 <- mm2[, !(colnames(mm2) %in% c(fExcl, "`(time)`", "`(status)`")), drop = FALSE]
+        (any(grepl("\\. ", as.character(formula2))) | formula2 == as.formula("~."))) {
+      kick <- colnames(mm2) %in% c(fExcl, "`(time)`", "`(status)`")
+      exclude2 <- exclude2[!kick]
+      mm2 <- mm2[, !kick, drop = FALSE]
+      exclude2[colnames(mm2) == "(Intercept)"] <- 1
+    }
+
+    ctrl$exclude1 <- exclude1
+    ctrl$exclude2 <- exclude2
+
     tmax <- max(time[status > 0])
     if (missing(t0)) t0 <- quantile(time[status > 0], c(1:9 / 10, .95))
     ## auto choose lambda; still under development
