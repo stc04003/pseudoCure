@@ -9,7 +9,7 @@ Authors@R: c(person(given = "Sy Han (Steven)", family = "Chiou",
 	   person(given = "Feng-Chang", family = " Lin",
 	   email = "flin@bios.unc.edu", role = "aut"))
 Date: 2024-12-11
-Description: A collection of easy-to-use tools for regression analysis of survival data with a cure fraction. The modeling framework is based on the Cox proportional hazards mixture cure model and the bounded cumulative hazard (promotion time cure) model. The pseudo-observations approach is utilized to assess covariate effects and embedded in the variable selection procedure. 
+Description: A collection of easy-to-use tools for regression analysis of survival data with a cure fraction proposed in Su et al. (2022) <10.1177/09622802221108579>. The modeling framework is based on the Cox proportional hazards mixture cure model and the bounded cumulative hazard (promotion time cure) model. The pseudo-observations approach is utilized to assess covariate effects and embedded in the variable selection procedure. 
 License: GPL (>= 2)
 Depends: R (>= 4.2.0)
 LinkingTo: Rcpp, RcppArmadillo

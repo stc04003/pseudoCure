@@ -18,16 +18,15 @@ simMC <- function(n) {
 }
 
 ## Fix seed and generate data
-set.seed(1); datMC <- simMC(1000)
+set.seed(1); datMC <- simMC(200)
 
 ## Oracle model with an unpenalized PHMC model
 summary(fit1 <- pCure(~ x.1 + x.3, ~ x.1 + x.3, Time, Status, datMC))
 
+
 ## Penalized PHMC model with tuning parameters selected by 10-fold cross validation
 ## User specifies the range of tuning parameters
-summary(update(fit1, lambda1 = 1:10 / 200, lambda2 = 1:10 / 200))
-## Auto selection of the range of tuning parameters
-summary(update(fit1, lambda1 = "auto", lambda2 = "auto"))
+summary(fit2 <- pCure(~ ., ~ ., Time, Status, datMC, lambda1 = 1:10 / 10, lambda2 = 1:10 / 10))
 
 ## Penalized PHMC model given tuning parameters
-summary(update(fit1, lambda1 = 0.006, lambda2 = 0.022))
+summary(update(fit2, lambda1 = 0.7, lambda2 = 0.4))

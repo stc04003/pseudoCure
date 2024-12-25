@@ -1,16 +1,16 @@
 
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
-developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![minimal R
 version](https://img.shields.io/badge/R%3E%3D-4.2.0-6666ff.svg)](https://cran.r-project.org/)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2023--06--10-yellowgreen.svg)](/commits/master)
+[![Last-changedate](https://img.shields.io/badge/last%20change-2024--12--25-yellowgreen.svg)](/commits/master)
 
------
+------------------------------------------------------------------------
 
 ## **pseudoCure**
 
------
+------------------------------------------------------------------------
 
 ## pseudoCure: Analysis of survival data with cure fraction and variable selection: A pseudo-observations approach
 
@@ -21,8 +21,7 @@ cumulative hazard model.
 
 ## Installation
 
-The package will be available on CRAN soon. Install and load the package
-from GitHub using
+Install and load the package from GitHub using
 
 ``` r
 > devtools::install_github("stc04003/pseudoCure")
