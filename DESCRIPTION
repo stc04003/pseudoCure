@@ -15,6 +15,6 @@ Depends: R (>= 4.2.0)
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.3.2
 NeedsCompilation: yes
-Packaged: 2024-12-11 10:41:11 UTC; schiou
+Packaged: 2025-01-31 10:41:11 UTC; schiou
 Encoding: UTF-8
 Imports: Rcpp, MASS, ggplot2, ggpubr, rlang
