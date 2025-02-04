@@ -4,7 +4,7 @@ state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![minimal R
 version](https://img.shields.io/badge/R%3E%3D-4.2.0-6666ff.svg)](https://cran.r-project.org/)
-[![Last-changedate](https://img.shields.io/badge/last%20change-2024--12--25-yellowgreen.svg)](/commits/master)
+<!--[![Last-changedate](https://img.shields.io/badge/last%20change-2025--02--03-yellowgreen.svg)](/commits/master)-->
 
 ------------------------------------------------------------------------
 
