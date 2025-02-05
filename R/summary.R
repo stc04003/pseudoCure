@@ -174,6 +174,10 @@ utils::globalVariables(c("vari", "lam"))
 #' @importFrom rlang call_args
 #' @importFrom ggpubr ggarrange
 #'
+#' @return A ggplot object representing the residual plot, cross-validation plot,
+#' or the trace plot for an object of class \code{"pCure"}. 
+#' This can be further modified using \code{"ggplot2"} functions.
+#' 
 #' @exportS3Method plot pCure
 plot.pCure <- function(x, part = "both", type = c("residuals", "cv", "trace"),...) {
   if (!is.pCure(x)) stop("Must be a pCure object")

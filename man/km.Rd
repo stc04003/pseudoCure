@@ -12,6 +12,11 @@ km(time, status)
 \item{status}{A numeric vector for the event indicator;
 0 indicates right-censoring and 1 indicates events.}
 }
+\value{
+A data frame with the Kaplan-Meier survival estimates, containing:
+  \item{time}{Time points at which the survival probability is estimated.}
+  \item{surv}{Estimated survival probability at each time point.}
+}
 \description{
 This function exclusively returns the Kaplan-Meier survival estimate and the corresponding time points.
 It does not provide standard errors or any additional outputs

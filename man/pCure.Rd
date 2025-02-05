@@ -70,6 +70,9 @@ The available options are \code{"lasso"} and \code{"scad"}.}
 
 \item{control}{A list of control parameters. See detail.}
 }
+\value{
+An object of class \code{"pCure"} representing a cure model fit.
+}
 \description{
 Fits either a mixture cure model or a bounded cumulative hazard (promotion time) model
 with pseudo-observation approach.

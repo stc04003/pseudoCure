@@ -38,6 +38,10 @@
 #' @param maxit A positive integer specifying the maximum number of iteration.
 #' Default at 100.
 #'
+#' @return An object of class \code{"geelm"} representing a linear model fit with GEE.
+#'
+#' @example inst/examples/ex_geelm.R
+#' 
 #' @importFrom rlang f_rhs
 #' @importFrom stats update model.response fitted resid
 #' @export
@@ -210,6 +214,10 @@ utils::globalVariables(c("variable", "lambda"))
 #' which correspond to the pseudo-residual plot, cross-validation plot,
 #' and trace plot for different values of the tuning parameter, respectively.
 #' @param ... Other arguments for future extension.
+#'
+#' @return A ggplot object representing the residual plot, cross-validation plot,
+#' or the trace plot for an object of class \code{"geelm"}. 
+#' This can be further modified using \code{"ggplot2"} functions.
 #' 
 #' @exportS3Method plot geelm
 plot.geelm <- function(x, type = c("residuals", "cv", "trace"),...) {

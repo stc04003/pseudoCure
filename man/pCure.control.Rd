@@ -32,6 +32,9 @@ This is only evoked when \code{lambda1 = "auto"} or \code{lambda2 = "auto"}.}
 
 \item{maxit}{An integer value specifying the maximum number of iteration.}
 }
+\value{
+A list with control parameters.
+}
 \description{
 This function provides the fitting options for the \code{pCure()} function.
 }

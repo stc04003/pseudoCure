@@ -37,6 +37,8 @@
 #' The default value is 5. 
 #' @param control A list of control parameters. See detail.
 #'
+#' @return An object of class \code{"pCure"} representing a cure model fit.
+#'
 #' @references Su, C.-L., Chiou, S., Lin, F.-C., and Platt, R. W. (2022)
 #' Analysis of survival data with cure fraction and variable selection: A pseudo-observations approach
 #' \emph{Statistical Methods in Medical Research}, \bold{31}(11): 2037--2053.
@@ -197,6 +199,8 @@ pCure <- function(formula1, formula2, time, status, data, subset, t0,
 #' This is only evoked when \code{lambda1 = "auto"} or \code{lambda2 = "auto"}.
 #' @param tol A positive numerical value specifying the absolute error tolerance in GEE algorithms.
 #' @param maxit An integer value specifying the maximum number of iteration.
+#'
+#' @return A list with control parameters.
 #' 
 #' @seealso \code{\link{pCure}}
 #' @export

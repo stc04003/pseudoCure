@@ -16,6 +16,11 @@ and trace plot for different values of the tuning parameter, respectively.}
 
 \item{...}{Other arguments for future extension.}
 }
+\value{
+A ggplot object representing the residual plot, cross-validation plot,
+or the trace plot for an object of class \code{"geelm"}. 
+This can be further modified using \code{"ggplot2"} functions.
+}
 \description{
 Plot method for 'geelm' objects
 }
