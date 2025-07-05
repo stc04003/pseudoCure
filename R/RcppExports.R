@@ -39,9 +39,13 @@ fastL <- function(x1, y1, dx1, dy1) {
     .Call(`_pseudoCure_fastL`, x1, y1, dx1, dy1)
 }
 
+fastDabrowska_vec <- function(tx, ty, x, y, dx, dy, L) {
+    .Call(`_pseudoCure_fastDabrowska_vec`, tx, ty, x, y, dx, dy, L)
+}
+
 #' @noRd
-fastTau2 <- function(x1, y1, dx1, dy1) {
-    .Call(`_pseudoCure_fastTau2`, x1, y1, dx1, dy1)
+fastTau <- function(x1, y1, dx1, dy1) {
+    .Call(`_pseudoCure_fastTau`, x1, y1, dx1, dy1)
 }
 
 #' @noRd

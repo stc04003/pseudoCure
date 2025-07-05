@@ -1,6 +1,6 @@
 Package: pseudoCure
 Title: A Pseudo-Observations Approach for Analyzing Survival Data with a Cure Fraction
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(person(given = "Sy Han (Steven)", family = "Chiou",
 	   email = "schiou@smu.edu",
 	   role = c("aut", "cre")),

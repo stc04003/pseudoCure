@@ -118,60 +118,77 @@ BEGIN_RCPP
 END_RCPP
 }
 // fastDabrowska
-double fastDabrowska(double tx, double ty, arma::vec x, arma::vec y, arma::vec dx, arma::vec dy, arma::mat L);
+double fastDabrowska(double tx, double ty, const arma::vec& x, const arma::vec& y, const arma::vec& dx, const arma::vec& dy, const arma::mat& L);
 RcppExport SEXP _pseudoCure_fastDabrowska(SEXP txSEXP, SEXP tySEXP, SEXP xSEXP, SEXP ySEXP, SEXP dxSEXP, SEXP dySEXP, SEXP LSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< double >::type tx(txSEXP);
     Rcpp::traits::input_parameter< double >::type ty(tySEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type x(xSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type dx(dxSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type dy(dySEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type L(LSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type dx(dxSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type dy(dySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type L(LSEXP);
     rcpp_result_gen = Rcpp::wrap(fastDabrowska(tx, ty, x, y, dx, dy, L));
     return rcpp_result_gen;
 END_RCPP
 }
 // fastL
-arma::mat fastL(arma::vec x1, arma::vec y1, arma::vec dx1, arma::vec dy1);
+arma::mat fastL(const arma::vec& x1, const arma::vec& y1, const arma::vec& dx1, const arma::vec& dy1);
 RcppExport SEXP _pseudoCure_fastL(SEXP x1SEXP, SEXP y1SEXP, SEXP dx1SEXP, SEXP dy1SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type x1(x1SEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type y1(y1SEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type dx1(dx1SEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type dy1(dy1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1(x1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y1(y1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type dx1(dx1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type dy1(dy1SEXP);
     rcpp_result_gen = Rcpp::wrap(fastL(x1, y1, dx1, dy1));
     return rcpp_result_gen;
 END_RCPP
 }
-// fastTau2
-double fastTau2(arma::vec x1, arma::vec y1, arma::vec dx1, arma::vec dy1);
-RcppExport SEXP _pseudoCure_fastTau2(SEXP x1SEXP, SEXP y1SEXP, SEXP dx1SEXP, SEXP dy1SEXP) {
+// fastDabrowska_vec
+arma::vec fastDabrowska_vec(const arma::vec& tx, const arma::vec& ty, const arma::vec& x, const arma::vec& y, const arma::vec& dx, const arma::vec& dy, const arma::mat& L);
+RcppExport SEXP _pseudoCure_fastDabrowska_vec(SEXP txSEXP, SEXP tySEXP, SEXP xSEXP, SEXP ySEXP, SEXP dxSEXP, SEXP dySEXP, SEXP LSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type x1(x1SEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type y1(y1SEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type dx1(dx1SEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type dy1(dy1SEXP);
-    rcpp_result_gen = Rcpp::wrap(fastTau2(x1, y1, dx1, dy1));
+    Rcpp::traits::input_parameter< const arma::vec& >::type tx(txSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type ty(tySEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type dx(dxSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type dy(dySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type L(LSEXP);
+    rcpp_result_gen = Rcpp::wrap(fastDabrowska_vec(tx, ty, x, y, dx, dy, L));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fastTau
+double fastTau(const arma::vec& x1, const arma::vec& y1, const arma::vec& dx1, const arma::vec& dy1);
+RcppExport SEXP _pseudoCure_fastTau(SEXP x1SEXP, SEXP y1SEXP, SEXP dx1SEXP, SEXP dy1SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1(x1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y1(y1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type dx1(dx1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type dy1(dy1SEXP);
+    rcpp_result_gen = Rcpp::wrap(fastTau(x1, y1, dx1, dy1));
     return rcpp_result_gen;
 END_RCPP
 }
 // pseudoTau
-arma::vec pseudoTau(arma::vec x1, arma::vec y1, arma::vec dx1, arma::vec dy1);
+arma::vec pseudoTau(const arma::vec& x1, const arma::vec& y1, const arma::vec& dx1, const arma::vec& dy1);
 RcppExport SEXP _pseudoCure_pseudoTau(SEXP x1SEXP, SEXP y1SEXP, SEXP dx1SEXP, SEXP dy1SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type x1(x1SEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type y1(y1SEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type dx1(dx1SEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type dy1(dy1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type x1(x1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type y1(y1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type dx1(dx1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type dy1(dy1SEXP);
     rcpp_result_gen = Rcpp::wrap(pseudoTau(x1, y1, dx1, dy1));
     return rcpp_result_gen;
 END_RCPP
