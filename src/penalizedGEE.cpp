@@ -156,16 +156,28 @@ Rcpp::List pgee(arma::vec y,
       }
       Rhat = Rhat + Rhat2 + Rhat2.t();
     }
-    // std::cout << "ahat: " << ahat << "\n";
+    arma::mat RhatInv = pinv(Rhat);
     for (int i = 0; i < N; i++) {
       arma::vec ym2 = ym(span(index(i), index(i) + nt(i) - 1));
       arma::mat bigD2 = bigD.rows(span(index(i), index(i) + nt(i) - 1));
-      arma::mat tmp = bigD2.t() * pinv(Rhat);
+      arma::mat tmp = bigD2.t() * RhatInv;
       S += tmp * ym2;
       H += tmp * bigD2;
       tmp *= ym2;
       M += tmp * tmp.t();
     }
+
+    // incase H (or bigD2) explored
+    H.replace(arma::datum::inf, pow(2, 1023));   
+    H.replace(-arma::datum::inf, -pow(2, 1023));
+    // H.replace(arma::datum::nan, 0.0);
+    // Can still get nan, in which case, break
+    if (H.has_nan()) {
+      b1 = b0;
+      break;
+    }
+    // std::cout << H << std::endl;
+    
     b1 = b0 + pinv(H + N * E) * (S - N * E * b0);
     out(0) = b1;
     out(1) = S;
