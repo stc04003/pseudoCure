@@ -98,7 +98,6 @@ arma::mat fastKM(arma::vec Time,
 		 arma::vec censor) {
   arma::vec T0 = arma::sort(arma::unique(Time));
   int n = T0.n_elem;
-  int N = Time.n_elem;
   arma::vec d(n, arma::fill::zeros);
   arma::vec r(n, arma::fill::zeros); 
   // calculate d and r

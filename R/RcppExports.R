@@ -30,17 +30,8 @@ testMZ <- function(Time, censor) {
 }
 
 #' @noRd
-fastDabrowska <- function(tx, ty, x, y, dx, dy, L) {
-    .Call(`_pseudoCure_fastDabrowska`, tx, ty, x, y, dx, dy, L)
-}
-
-#' @noRd
 fastL <- function(x1, y1, dx1, dy1) {
     .Call(`_pseudoCure_fastL`, x1, y1, dx1, dy1)
-}
-
-fastDabrowska_vec <- function(tx, ty, x, y, dx, dy, L) {
-    .Call(`_pseudoCure_fastDabrowska_vec`, tx, ty, x, y, dx, dy, L)
 }
 
 #' @noRd
