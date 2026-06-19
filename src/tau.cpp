@@ -255,6 +255,54 @@ arma::mat fastD(const arma::vec& x1,
   return dabrowska_surface_unique(x, y, dx, dy, L);
 }
 
+
+
+// Estimate tie probability term:
+//   P{(T1_i - T1_j)(T2_i - T2_j) = 0}
+// = P(T1_i = T1_j or T2_i = T2_j)
+// = sum_s p1(s)^2 + sum_t p2(t)^2 - sum_{s,t} p12(s,t)^2.
+//
+// Here p1 and p2 are estimated marginal point masses from the KM margins,
+// and p12 is estimated by the Dabrowska rectangle mass on the unique grid.
+double tie_prob_from_surface(const arma::mat& D) {
+  const arma::uword nx = D.n_rows - 1;
+  const arma::uword ny = D.n_cols - 1;
+
+  double px2 = 0.0;
+  double py2 = 0.0;
+  double pxy2 = 0.0;
+
+  // Marginal point masses: p_X(x_i) = S_X(x_{i-1}) - S_X(x_i),
+  // where D(0,0)=1 and D(i,0)=S_X(x_i).
+  for (arma::uword i = 1; i <= nx; ++i) {
+    const double px = D(i - 1, 0) - D(i, 0);
+    if (std::isfinite(px)) px2 += px * px;
+  }
+
+  // Marginal point masses for Y.
+  for (arma::uword j = 1; j <= ny; ++j) {
+    const double py = D(0, j - 1) - D(0, j);
+    if (std::isfinite(py)) py2 += py * py;
+  }
+
+  // Joint point masses on each unique rectangle.
+  for (arma::uword i = 1; i <= nx; ++i) {
+    for (arma::uword j = 1; j <= ny; ++j) {
+      const double pxy = D(i, j) - D(i, j - 1) - D(i - 1, j) + D(i - 1, j - 1);
+      if (std::isfinite(pxy)) pxy2 += pxy * pxy;
+    }
+  }
+
+  double tie_prob = px2 + py2 - pxy2;
+
+  // Numerical guard only; this should be in [0, 1] theoretically.
+  if (!std::isfinite(tie_prob)) return NA_REAL;
+  if (tie_prob < 0.0 && tie_prob > -1e-10) tie_prob = 0.0;
+  if (tie_prob > 1.0 && tie_prob < 1.0 + 1e-10) tie_prob = 1.0;
+
+  return tie_prob;
+}
+
 // [[Rcpp::export(rng = false)]]
 double fastTau(const arma::vec& x1,
                const arma::vec& y1,
@@ -289,6 +337,73 @@ double fastTau(const arma::vec& x1,
 
   const double tau = 4.0 * out - 1.0;
   return tau;
+}
+
+
+// Tie-adjusted version based on equations (3.2) and (3.3) in your screenshot.
+// Returns:
+//   tau_base   = 4 * P_hat(T1_i > T1_j, T2_i > T2_j) - 1
+//   tie_prob   = P_hat{(T1_i - T1_j)(T2_i - T2_j) = 0}
+//   tau_tilde  = tau_base + tie_prob
+//   gamma      = tau_tilde / (1 - tie_prob)
+//
+// If you want fastTau() itself to return the tie-adjusted value, use
+// fastTauTieAdjusted(...)["tau_tilde"] in R or replace the return value
+// in fastTau() by tau + tie_prob.
+// [[Rcpp::export(rng = false)]]
+Rcpp::List fastTauTieAdjusted(const arma::vec& x1,
+                              const arma::vec& y1,
+                              const arma::vec& dx1,
+                              const arma::vec& dy1) {
+  const arma::uword n = x1.n_elem;
+  if (n == 0) {
+    return Rcpp::List::create(
+      Rcpp::Named("tau_base") = NA_REAL,
+      Rcpp::Named("tie_prob") = NA_REAL,
+      Rcpp::Named("tau_tilde") = NA_REAL,
+      Rcpp::Named("gamma") = NA_REAL
+    );
+  }
+
+  arma::uvec ordX = sort_index(x1);
+  arma::uvec ordY = sort_index(y1);
+
+  arma::vec x = x1(ordX);
+  arma::vec y = y1(ordY);
+  arma::vec dx = dx1(ordX);
+  arma::vec dy = dy1(ordY);
+
+  arma::mat L = fastL_unique_internal(x1, y1, dx1, dy1);
+  arma::mat D = dabrowska_surface_unique(x, y, dx, dy, L);
+
+  const arma::uword nx = D.n_rows - 1;
+  const arma::uword ny = D.n_cols - 1;
+
+  double out = 0.0;
+
+  for (arma::uword i = 1; i <= nx; ++i) {
+    for (arma::uword j = 1; j <= ny; ++j) {
+      const double d1 = D(i, j);
+      const double inc = D(i, j) - D(i, j - 1) - D(i - 1, j) + D(i - 1, j - 1);
+      out += d1 * inc;
+    }
+  }
+
+  const double tau_base = 4.0 * out - 1.0;
+  const double tie_prob = tie_prob_from_surface(D);
+  const double tau_tilde = tau_base + tie_prob;
+
+  double gamma = NA_REAL;
+  if (std::isfinite(tie_prob) && std::abs(1.0 - tie_prob) > 1e-12) {
+    gamma = tau_tilde / (1.0 - tie_prob);
+  }
+
+  return Rcpp::List::create(
+    Rcpp::Named("tau_base") = tau_base,
+    Rcpp::Named("tie_prob") = tie_prob,
+    Rcpp::Named("tau_tilde") = tau_tilde,
+    Rcpp::Named("gamma") = gamma
+  );
 }
 
 // Diagnostic version: useful for checking whether the estimated surface gives
